@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
+    <style>
+        body {
+            position: relative;
+        }
+    </style>
+</head>
+
+<body data-spy="scroll" data-target=".navbar" data-offset="50">
+
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="#section1">Section 1</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#section2">Section 2</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#section3">Section 3</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+                    Section 4
+                </a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#section41">Link 1</a>
+                    <a class="dropdown-item" href="#section42">Link 2</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <div id="section1" class="container-fluid bg-success" style="padding-top:70px;padding-bottom:70px">
+        <h1>Section 1</h1>
+        <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and
+            look at the navigation bar while scrolling!</p>
+        <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and
+            look at the navigation bar while scrolling!</p>
+    </div>
+    <div id="section2" class="container-fluid bg-warning" style="padding-top:70px;padding-bottom:70px">
+        <h1>Section 2</h1>
+        <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and
+            look at the navigation bar while scrolling!</p>
+        <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and
+            look at the navigation bar while scrolling!</p>
+    </div>
+    <div id="section3" class="container-fluid bg-secondary" style="padding-top:70px;padding-bottom:70px">
+        <h1>Section 3</h1>
+        <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and
+            look at the navigation bar while scrolling!</p>
+        <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and
+            look at the navigation bar while scrolling!</p>
+    </div>
+    <div id="section41" class="container-fluid bg-danger" style="padding-top:70px;padding-bottom:70px">
+        <h1>Section 4 Submenu 1</h1>
+        <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and
+            look at the navigation bar while scrolling!</p>
+        <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and
+            look at the navigation bar while scrolling!</p>
+    </div>
+    <div id="section42" class="container-fluid bg-info" style="padding-top:70px;padding-bottom:70px">
+        <h1>Section 4 Submenu 2</h1>
+        <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and
+            look at the navigation bar while scrolling!</p>
+        <p>Try to scroll this section and look at the navigation bar while scrolling! Try to scroll this section and
+            look at the navigation bar while scrolling!</p>
+    </div>
+
+    <script>
+        const socket = io('ws://localhost:3000');
+
+        socket.on('connect', () => {
+            // either with send()
+            socket.send('Hello!');
+
+            // or with emit() and custom event names
+            socket.emit('response_evet', 'Hello!'+Date.now(), { 'mr': 'john' }, Uint8Array.from([1, 2, 3, 4]));
+        });
+
+        // handle the event sent with socket.send()
+        socket.on('message', data => {
+            console.log(data);
+        });
+
+        // handle the event sent with socket.emit()
+        socket.on('greetings', (elem1, elem2, elem3) => {
+            console.log(elem1, elem2, elem3);
+        });
+    </script>
+        <!--
+        -->
+
+        <input type="text" id="titulo" name="titulo"><br>
+        <input type="text" id="contenido" name="contenido"><br>
+
+        <input type="submit" value="Send" id="send">
+
+        <script type="text/javascript">
+                //var socket = io();
+
+                $('#send').click(function () {
+                        var titulo = $('#titulo').val();
+                        var contenido = $('#contenido').val();
+
+                        if (titulo != '' && contenido != '') {
+                                console.log('podes comentar');
+
+                                /*
+                                title: String,
+                                description: String,
+                                by: String,
+                                url: String,
+                                */
+                                var data = {
+                                        'title': titulo, 
+                                        'description': contenido,
+                                        'username': "raul7925",
+                                        'password': "req.body.password",
+                                        'photo': "String"
+                                };
+
+                                //console.log("data");
+                                //console.log(data);
+                                //$('.comments').append("<p>"+comment+"</p>");
+                                //$('#comment').val('');
+                        }
+                        else {
+                                console.log("paso algo pa'");
+
+                        }
+
+                        //socket.emit('comment',data);
+                        socket.emit('post', data, function (datos) {
+                                console.log("socket.io emit");
+                                console.log(datos);
+                                //$('.posts').append("<tr><td>" + datos.by + "</td><td>"+datos.title+"</td><td><a href='/posts/detail/" + datos._id + "' title='Post Detail'>Detail</a></td></tr>");
+                                
+                                
+                                //$('.posts').append("<tr><td>" + datos.title + "</td><td>" + datos.description + "</td><td><a href='/posts/detail/" + datos._id + "' title='Post Detail'>Detail</a></td></tr>");
+
+
+                        });
+
+
+                });
+                socket.on('post', function (datos) {
+                        console.log("data received");
+                        console.log(datos);
+                        console.log('received');
+
+                        //$('.posts').append("<p>" + data.title + "</p>");
+                        //$('.testtable').append("<tr><td>"+data.by+"</td><td>"+data.title+"</td><td><a title='Post Detail'>"+data.description+"</a></td></tr>");
+                        //$('.posts').append("<tr><td>" + data.by + "</td><td>Video stream with Node.js</td><td><a href='/posts/detail/' title='Post Detail'>" + data.title + "</a></td></tr>");
+                        
+                        
+                        //$('.posts').append("<tr><td>" + datos.title + "</td><td>" + datos.description + "</td><td><a href='/posts/detail/" + datos._id + "' title='Post Detail'>Detail</a></td></tr>");
+
+
+                });
+
+        </script>
+</body>
+
+</html>
