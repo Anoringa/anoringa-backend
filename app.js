@@ -8,6 +8,12 @@ var apiRouter = require("./routes/api");
 var apiResponse = require("./helpers/apiResponse");
 var cors = require("cors");
 
+
+
+// Server configuration
+var SERVER_ADDRESS = process.env.SERVER_ADDRESS;
+var SERVER_PORT = process.env.SERVER_PORT;
+
 // DB connection
 var MONGODB_URL = process.env.MONGODB_URL;
 var mongoose = require("mongoose");
@@ -72,7 +78,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 */
 
-var server = app.listen(3000, "127.0.0.1", function () {
+var server = app.listen(SERVER_PORT, SERVER_ADDRESS, function () {
   console.log(
     "App server up and running on %s and port %s",
     server.address().address,
@@ -193,6 +199,5 @@ io.on("connection", function (socket) {
 
 //module.exports = app;
 
-const port = 3000;
 
 //app.listen(port, () => {console.log(`Example app listening at http://localhost:${port}`)})
