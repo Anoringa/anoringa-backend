@@ -6,6 +6,7 @@
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www",
     "try": "nodemon ./app.js",
+    "serve": "node ./app.js",
     "test": "nyc _mocha --timeout 10000 --exit --report lcovonly -- -R spec",
     "lint": "eslint --fix --config .eslintrc.json \"**/*.js\""
   },
