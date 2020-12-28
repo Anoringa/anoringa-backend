@@ -78,7 +78,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 */
 
-var server = app.listen(SERVER_PORT, SERVER_ADDRESS, function () {
+//var server = app.listen(SERVER_PORT, SERVER_ADDRESS, function () {
+var server = app.listen(SERVER_PORT || 3000, function () {
   console.log(
     "App server up and running on %s and port %s",
     server.address().address,
