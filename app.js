@@ -161,12 +161,14 @@ io.on("connection", function (socket) {
         //return Promise.reject("Post already exist with this title");
       } else {
         console.log("Post Create");
-
+		console.log(post);
         User.findOne({ username: data.username }).then((user) => {
           if (user) {
             console.log("User exist with this username");
             console.log(user);
-            if ((user.password = data.password)) {
+            console.log("password");
+            console.log(data.password);
+            if ((user.password == data.password)) {
 				console.log("User password OK");
               //return Promise.reject("Post already exist with this title");
               var postData = new Post({
