@@ -42,14 +42,28 @@ exports.register = [
 					// generate OTP for confirmation
 					let username_random = utility.randomNumber(4);
 					// Create User object with escaped and trimmed data
+
+					var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+					
+					
+					
+					console.log('IP');
+					console.log(ip);
+					//console.log(req.headers['x-forwarded-for']);
+					//console.log(req.connection.remoteAddress);
+					//console.log(req.ip);
+					
 					var user = new UserModel(
 						{
 							username: "raul"+username_random,
-							ipaddress: "127.0.0.1",
+							//ipaddress: "127.0.0.1",
+							ipaddress: ip,
 							password: hash,
 							status: true
 						}
 					);
+					console.log('user');
+					console.log(user);
 
 						user.save(function (err) {
 							if (err) { return apiResponse.ErrorResponse(res, err); }
