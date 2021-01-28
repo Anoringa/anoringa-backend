@@ -54,33 +54,33 @@ exports.bookList = [
   },
 ];
 exports.postList = [
-	(req, res) => {
-	  try {
-		Post.find(
-		  { },
-		  "_id title description photo user createdAt updatedAt"
-		).then((post) => {
-		  if (post.length > 0) {
-			return apiResponse.successResponseWithData(
-			  res,
-			  "Operation success",
-			  post
-			);
-		  } else {
-			return apiResponse.successResponseWithData(
-			  res,
-			  "Operation success",
-			  []
-			);
-		  }
-		});
-	  } catch (err) {
-		//throw error in json response with status 500.
-		return apiResponse.ErrorResponse(res, err);
-	  }
-	},
-  ];
-  
+  (req, res) => {
+    try {
+      Post.find(
+        {},
+        "_id title description photo user createdAt updatedAt"
+      ).then((post) => {
+        if (post.length > 0) {
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            post
+          );
+        } else {
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            []
+          );
+        }
+      });
+    } catch (err) {
+      //throw error in json response with status 500.
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+
 /**
  * Book Detail.
  *
@@ -121,54 +121,57 @@ exports.bookDetail = [
   },
 ];
 exports.postDetail = [
-	
-	//body("id").isLength({ min: 1 }).trim().withMessage("Username must be specified.").isAlphanumeric().withMessage("Username has non-alphanumeric characters."),
+  //body("id").isLength({ min: 1 }).trim().withMessage("Username must be specified.").isAlphanumeric().withMessage("Username has non-alphanumeric characters."),
 
-	body("id").isLength({ min: 1 }).trim().withMessage("Post ID must be specified.")
-	.isAlphanumeric().withMessage("Post ID must be a valid identificator.").custom((value) => {
-		return PostModel.findOne({_id : value}).then((post) => {
-			if (post) {
-				console.log("Post ID already exist");
-			}
-			else{
-				console.log("Post ID not exist");
-			}
-		});
-	}),
+  body("id")
+    .isLength({ min: 1 })
+    .trim()
+    .withMessage("Post ID must be specified.")
+    .isAlphanumeric()
+    .withMessage("Post ID must be a valid identificator.")
+    .custom((value) => {
+      return PostModel.findOne({ _id: value }).then((post) => {
+        if (post) {
+          console.log("Post ID already exist");
+        } else {
+          console.log("Post ID not exist");
+        }
+      });
+    }),
 
-	sanitizeBody("id").escape(),
+  sanitizeBody("id").escape(),
 
-	(req, res) => {
-	  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-		return apiResponse.successResponseWithData(res, "Operation success", {});
-	  }
-	  try {
-		Post.findOne(
-		  { _id: req.params.id},
-		  "_id title description photo user createdAt updatedAt"
-		).then((post) => {
-		  if (post !== null) {
-			let postData = new PostData(post);
-			return apiResponse.successResponseWithData(
-			  res,
-			  "Operation success",
-			  postData
-			);
-		  } else {
-			return apiResponse.successResponseWithData(
-			  res,
-			  "Operation success",
-			  {}
-			);
-		  }
-		});
-	  } catch (err) {
-		//throw error in json response with status 500.
-		return apiResponse.ErrorResponse(res, err);
-	  }
-	},
-  ];
-  
+  (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return apiResponse.successResponseWithData(res, "Operation success", {});
+    }
+    try {
+      Post.findOne(
+        { _id: req.params.id },
+        "_id title description photo user createdAt updatedAt"
+      ).then((post) => {
+        if (post !== null) {
+          let postData = new PostData(post);
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            postData
+          );
+        } else {
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            {}
+          );
+        }
+      });
+    } catch (err) {
+      //throw error in json response with status 500.
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+
 /**
  * Book store.
  *
@@ -211,8 +214,8 @@ exports.postStore = [
     try {
       console.log("try");
 
-	  const secret = process.env.JWT_SECRET;
-			/*
+      const secret = process.env.JWT_SECRET;
+      /*
         jwt.verify(authorization, secret, function (err, decoded) {
           if (err) {
 			console.log("test");
@@ -224,7 +227,7 @@ exports.postStore = [
 		});
 		*/
 
-	  /*
+      /*
 
 
       if (req.headers && req.headers.authorization) {

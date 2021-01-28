@@ -8,5 +8,4 @@ router.get("/:id", PostController.postDetail);
 router.post("/", PostController.postStore);
 //router.put("/:id", PostController.bookUpdate);
 //router.delete("/:id", PostController.bookDelete);
-
 module.exports = router;

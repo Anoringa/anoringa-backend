@@ -12,8 +12,8 @@
     "lint": "eslint --fix --config .eslintrc.json \"**/*.js\""
   },
   "dependencies": {
-    "bcrypt": "^3.0.6",
-    "codacy-coverage": "^3.4.0",
+    "bcrypt": "^5.0.0",
+    "codacy-coverage": "^3.2.0",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
