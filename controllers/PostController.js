@@ -7,8 +7,78 @@ var mongoose = require("mongoose");
 const jwt = require("express-jwt");
 mongoose.set("useFindAndModify", false);
 
+var axios = require("axios");
+var request = require('request');
+
+var FormData = require("form-data");
+
+
 var jwt_decode = require("jwt-decode");
 const PostModel = require("../models/PostModel");
+
+function uploadImageImgur(base64code) {
+  console.log("base64code");
+  //console.log(base64code);
+  /*
+  var res = base64code.split(",");
+  console.log("res[1]");
+  //console.log(res[1]);
+  var imagetoupload = ","+res[1]
+  */
+
+  var imagetoupload = ","+base64code.substr(base64code.indexOf(',') + 1);
+
+  console.log(imagetoupload);
+  
+  var options = {
+    'method': 'POST',
+    'url': 'https://api.imgur.com/3/image',
+    'headers': {
+      'Authorization': 'Client-ID 174d4c0bf585d3e',
+      'Cookie': 'IMGURSESSION=33830339e512851916f4645cc2f83c45; _nc=1'
+    },
+    formData: {
+      'image': imagetoupload
+    }
+  };
+  request(options, function (error, response) {
+    if (error) throw new Error(error);
+    console.log(response.body);
+    return response.body.data.link;
+  });
+  
+}
+function uploadImageImgur2(base64code) {
+  console.log("base64code");
+  console.log(base64code);
+
+  var res = base64code.split(",");
+  console.log(res[1]);
+
+  var data = new FormData();
+
+  data.append("image", res[1]);
+
+  var config = {
+    method: "post",
+    url: "https://api.imgur.com/3/image",
+    headers: {
+      Authorization: "Client-ID 3874349859f507b",
+    },
+    data: data,
+  };
+
+  axios(config)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+      console.log(response.data.data.link);
+      return response.data.data.link;
+    })
+    .catch(function (error) {
+      console.log(error);
+      return "error";
+    });
+}
 
 // Post Schema
 function PostData(data) {

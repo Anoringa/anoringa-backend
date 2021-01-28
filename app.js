@@ -8,8 +8,6 @@ var apiRouter = require("./routes/api");
 var apiResponse = require("./helpers/apiResponse");
 var cors = require("cors");
 
-
-
 // Server configuration
 var SERVER_ADDRESS = process.env.SERVER_ADDRESS;
 var SERVER_PORT = process.env.SERVER_PORT;
@@ -161,21 +159,29 @@ io.on("connection", function (socket) {
         //return Promise.reject("Post already exist with this title");
       } else {
         console.log("Post Create");
-		console.log(post);
+        console.log(post);
         User.findOne({ username: data.username }).then((user) => {
           if (user) {
             console.log("User exist with this username");
             console.log(user);
             console.log("password");
             console.log(data.password);
-            if ((user.password == data.password)) {
-				console.log("User password OK");
+            if (user.password == data.password) {
+              console.log("User password OK");
               //return Promise.reject("Post already exist with this title");
+
+              console.log("post settings");
+              console.log(data.title);
+              console.log(data.description);
+              console.log(data.photo);
+              if (data.photo == "" || data.photo == null) {
+                data.photo = "http://placekitten.com/300/300"
+              }
               var postData = new Post({
                 title: data.title,
                 description: data.description,
                 user: user._id,
-                photo: "String",
+                photo: data.photo,
               });
 
               postData.save();
@@ -185,8 +191,7 @@ io.on("connection", function (socket) {
               return callback(postData);
               //return postData;
             } else {
-				console.log("User password wrong");
-
+              console.log("User password wrong");
             }
           } else {
             console.log("User dont exist");
@@ -201,6 +206,5 @@ io.on("connection", function (socket) {
 });
 
 //module.exports = app;
-
 
 //app.listen(port, () => {console.log(`Example app listening at http://localhost:${port}`)})
