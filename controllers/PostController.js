@@ -10,8 +10,6 @@ mongoose.set("useFindAndModify", false);
 var axios = require("axios");
 var request = require('request');
 
-var FormData = require("form-data");
-
 
 var jwt_decode = require("jwt-decode");
 const PostModel = require("../models/PostModel");
@@ -47,37 +45,6 @@ function uploadImageImgur(base64code) {
     return response.body.data.link;
   });
   
-}
-function uploadImageImgur2(base64code) {
-  console.log("base64code");
-  console.log(base64code);
-
-  var res = base64code.split(",");
-  console.log(res[1]);
-
-  var data = new FormData();
-
-  data.append("image", res[1]);
-
-  var config = {
-    method: "post",
-    url: "https://api.imgur.com/3/image",
-    headers: {
-      Authorization: "Client-ID 3874349859f507b",
-    },
-    data: data,
-  };
-
-  axios(config)
-    .then(function (response) {
-      console.log(JSON.stringify(response.data));
-      console.log(response.data.data.link);
-      return response.data.data.link;
-    })
-    .catch(function (error) {
-      console.log(error);
-      return "error";
-    });
 }
 
 // Post Schema
