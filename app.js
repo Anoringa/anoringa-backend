@@ -114,33 +114,75 @@ const Comment = require("./models/CommentModel");
 const User = require("./models/UserModel");
 
 io.on("connection", function (socket) {
-  socket.on("comment", function (data) {
+  socket.on("comment", function (data, callback) {
     /*
-	  user
+    username
+    password
 	  post
-	  content
+    text
+    inResponseTo
 	  */
 
-    var user = db.User.find({ username: data.username });
-    console.log(user);
+    Post.findOne({ _id: data.postid }).then((post) => {
+      if (post) {
+        console.log("Post exist");
+        //return Promise.reject("Post already exist with this title");
 
-    var poster = db.Post.find({ title: data.posttitle });
-    console.log(poster);
+        console.log(post);
+        User.findOne({ username: data.username }).then((user) => {
+          if (user) {
+            console.log("User exist with this username");
+            console.log(user);
+            console.log("password");
+            console.log(data.password);
+            if (user.password == data.password) {
+              console.log("User password OK");
+              //return Promise.reject("Post already exist with this title");
 
-    var commentData = createComment({
-      author: user._id,
-      post: poster._id,
-      text: data.content,
-      createdAt: Date.now(),
+              console.log("comment settings");
+              console.log(user._id);
+              console.log(post._id);
+              console.log(data.text);
+
+              var commentData = Comment({
+                _id: data._id,
+                user: user._id,
+                username: user.username,
+                post: post._id,
+                text: data.text,
+                inResponseTo: data.inResponseTo,
+              });
+
+              commentData.save();
+              console.log("\n>> Comment Created:\n", commentData);
+              socket.broadcast.emit("comment", commentData);
+              return callback(commentData);
+
+              //return postData;
+            } else {
+              console.log("User password wrong");
+            }
+          } else {
+            console.log("User dont exist");
+
+            //var user = User.findOne({ username: data.username });
+            //console.log(user);
+          }
+        });
+      } else {
+        console.log("Post dont exist");
+      }
     });
+    /*
+    var userer = db.User.find({ username: data.username });
+    console.log(userer);
 
-    console.log("\n>> Comment Created:\n", commentData);
-
-    socket.broadcast.emit("comment", commentData);
-
-    return callback(commentData);
+    var poster = db.Post.find({ title: data.title });
+    console.log(poster);
+    */
   });
 });
+
 io.on("connection", function (socket) {
   socket.on("post", function (data, callback) {
     /*
@@ -175,7 +217,7 @@ io.on("connection", function (socket) {
               console.log(data.description);
               console.log(data.photo);
               if (data.photo == "" || data.photo == null) {
-                data.photo = "http://placekitten.com/300/300"
+                data.photo = "http://placekitten.com/300/300";
               }
               var postData = new Post({
                 title: data.title,

@@ -5,6 +5,7 @@ var Schema = mongoose.Schema;
 var CommentSchema = new Schema(
   {
     text: { type: String, required: true },
+    username: { type: String, required: true },
     user: {
       type: Schema.ObjectId,
       ref: "User",
@@ -15,6 +16,7 @@ var CommentSchema = new Schema(
       ref: "Post",
       required: true,
     },
+    inResponseTo: [{type: Schema.ObjectId, ref: 'Comment',required: false,}]
   },
   { timestamps: true }
 );

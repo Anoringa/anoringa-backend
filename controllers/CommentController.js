@@ -1,6 +1,4 @@
-const Post = require("../models/PostModel");
 const Comment = require("../models/CommentModel");
-
 const { body, validationResult } = require("express-validator");
 const { sanitizeBody } = require("express-validator");
 const apiResponse = require("../helpers/apiResponse");
@@ -10,62 +8,21 @@ const jwt = require("express-jwt");
 mongoose.set("useFindAndModify", false);
 
 var axios = require("axios");
-var request = require("request");
+var request = require('request');
+
 
 var jwt_decode = require("jwt-decode");
-const PostModel = require("../models/PostModel");
+const CommentModel = require("../models/CommentModel");
 
-function uploadImageImgur(base64code) {
-  console.log("base64code");
-  //console.log(base64code);
-  /*
-  var res = base64code.split(",");
-  console.log("res[1]");
-  //console.log(res[1]);
-  var imagetoupload = ","+res[1]
-  */
 
-  var imagetoupload = "," + base64code.substr(base64code.indexOf(",") + 1);
-
-  console.log(imagetoupload);
-
-  var options = {
-    method: "POST",
-    url: "https://api.imgur.com/3/image",
-    headers: {
-      Authorization: "Client-ID 174d4c0bf585d3e",
-      Cookie: "IMGURSESSION=33830339e512851916f4645cc2f83c45; _nc=1",
-    },
-    formData: {
-      image: imagetoupload,
-    },
-  };
-  request(options, function (error, response) {
-    if (error) throw new Error(error);
-    console.log(response.body);
-    return response.body.data.link;
-  });
-}
-
-// Comment Schema
+// Post Schema
 function CommentData(data) {
   this.id = data._id;
   this.text = data.text;
-  this.user = data.user;
-  this.username = data.username;
-
-  this.inResponseTo = data.inResponseTo;
-  this.createdAt = data.createdAt;
-  this.updatedAt = data.updatedAt;
-}
-
-// Post Schema
-function PostData(data) {
-  this.id = data._id;
-  this.title = data.title;
-  this.description = data.description;
-  this.photo = data.photo;
-  this.comments = [];
+  
+  this.user = data.user._id;
+  this.post = data.post._id;
+  
   this.createdAt = data.createdAt;
   this.updatedAt = data.updatedAt;
 }
@@ -202,23 +159,11 @@ exports.postDetail = [
       ).then((post) => {
         if (post !== null) {
           let postData = new PostData(post);
-
-          Comment.find(
-            { post: req.params.id },
-            "_id user username text inResponseTo createdAt updatedAt"
-          ).then((comments) => {
-            console.log("comments");
-            console.log(comments);
-            if (comments !== null) {
-              //let commentData = new CommentData(comments);
-              postData.comments = comments;
-              return apiResponse.successResponseWithData(
-                res,
-                "Operation success",
-                postData
-              );
-            }
-          });
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            postData
+          );
         } else {
           return apiResponse.successResponseWithData(
             res,
