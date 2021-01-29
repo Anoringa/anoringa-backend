@@ -62,9 +62,13 @@ function CommentData(data) {
 // Post Schema
 function PostData(data) {
   this.id = data._id;
+
   this.title = data.title;
   this.description = data.description;
   this.photo = data.photo;
+
+  this.user = data.user;
+
   this.comments = [];
   this.createdAt = data.createdAt;
   this.updatedAt = data.updatedAt;
