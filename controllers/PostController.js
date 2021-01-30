@@ -174,7 +174,15 @@ exports.bookDetail = [
     }
   },
 ];
-exports.postDetail = [
+
+/**
+ * Post Detail.
+ *
+ * @param {string}      id
+ *
+ * @returns {Object}
+ */
+exports.postDetail2 = [
   //body("id").isLength({ min: 1 }).trim().withMessage("Username must be specified.").isAlphanumeric().withMessage("Username has non-alphanumeric characters."),
 
   body("id")
@@ -238,6 +246,170 @@ exports.postDetail = [
   },
 ];
 
+var pipeline = [
+  {
+    $lookup: {
+      from: "users",
+      localField: "user",
+      foreignField: "_id",
+      as: "user",
+    },
+  },
+  {
+    $project: {
+      _id: 1,
+      title: 2,
+      description: 1,
+      photo: 1,
+      createdAt: 1,
+      updatedAt: 1,
+
+      "user.username": 3,
+      "user._id": 4,
+    },
+  },
+];
+/**
+ * Post Detail Test
+ *
+ * @param {string}      id
+ *
+ * @returns {Object}
+ */
+exports.postDetail = [
+  //body("id").isLength({ min: 1 }).trim().withMessage("Username must be specified.").isAlphanumeric().withMessage("Username has non-alphanumeric characters."),
+
+  body("id")
+    .isLength({ min: 1 })
+    .trim()
+    .withMessage("Post ID must be specified.")
+    .isAlphanumeric()
+    .withMessage("Post ID must be a valid identificator.")
+    .custom((value) => {
+      return PostModel.findOne({ _id: value }).then((post) => {
+        if (post) {
+          console.log("Post ID already exist");
+        } else {
+          console.log("Post ID not exist");
+        }
+      });
+    }),
+
+  sanitizeBody("id").escape(),
+
+  (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      console.log("❌❌❌❌❌ no post xd");
+      return apiResponse.ErrorResponse(res, "the Post doesnt exist");
+    }
+    try {
+      Post.aggregate([
+        {
+          $match: { _id: mongoose.Types.ObjectId(req.params.id)},
+        },
+        /**/
+        {
+          $lookup: {
+            from: "users",
+            localField: "user",
+            foreignField: "_id",
+            as: "user",
+            
+          },
+        },
+        {
+          $lookup: {
+            from: "comments",
+            localField: "_id",
+            foreignField: "post",
+            as: "comments",
+            /*
+            pipeline: [
+              { $match: { $expr: { $eq: [$user, $$_id] }}},
+              { $lookup: {
+                from: users,
+                let: { _id: $user },
+                as: address
+              }}
+            ],*/
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            description: 1,
+            photo: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            comments: 1,
+            //"comments.post": 0,
+
+            "user.username": 1,
+            "user._id": 1,
+          }
+        },
+        { $limit: 1 },
+      ]).then((post) => {
+        if (post.length !== 0) {
+          console.log("post");
+          console.log(post);
+          console.log(typeof post);
+          console.log(post[0]);
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            post[0]
+          );
+        }
+        else{
+          console.log("🎅❌❌❌❌❌ no post");
+          return apiResponse.ErrorResponse(res, "the id is wrong");
+          
+        }
+      });
+    } catch (err) {
+      //throw error in json response with status 500.
+      return apiResponse.ErrorResponse(res, err);
+    }
+
+    /*
+        { _id: req.params.id },
+        "_id title description photo user createdAt updatedAt"
+      ).then((post) => {
+        if (post !== null) {
+          let postData = new PostData(post);
+
+          Comment.find(
+            { post: req.params.id },
+            "_id user username text inResponseTo createdAt updatedAt"
+          ).then((comments) => {
+            console.log("comments");
+            console.log(comments);
+            if (comments !== null) {
+              //let commentData = new CommentData(comments);
+              postData.comments = comments;
+              return apiResponse.successResponseWithData(
+                res,
+                "Operation success",
+                postData
+              );
+            }
+          });
+        } else {
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            {}
+          );
+      });
+    } catch (err) {
+      //throw error in json response with status 500.
+      return apiResponse.ErrorResponse(res, err);
+    }
+        */
+  },
+];
 /**
  * Book store.
  *
