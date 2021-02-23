@@ -10,61 +10,20 @@ const { constants } = require("../helpers/constants");
 
 var axios = require("axios");
 var FormData = require("form-data");
-var querystring = require("querystring");
 
-function validate(token_received) {
-  console.log("validating");
-  console.log("token_received");
-  console.log(token_received);
-  console.log(token_received.substr(token_received.length - 25));
-
-  axios
-    .post(
-      "https://hcaptcha.com/siteverify",
-      querystring.stringify({
-        secret: "0x653D78Bfd96255a7d25d2e7BA8724901fAF9c818",
-        response: token_received,
-      })
-    )
-    .then(function (response) {
-      console.log(JSON.stringify(response.data));
-      try {
-        if (response.data.success == true) {
-          console.log("user registered correctly");
-          return true;
-        } else {
-          console.log("validation failed");
-          console.log("user cant register");
-          return false;
-        }
-      } catch (error) {
-        console.log("json error");
-        console.log("user cant register");
-        return false;
-      }
-    })
-    .catch(function (error) {
-      console.log(error);
-      console.log("user cant register");
-      return false;
-    });
-  /*
-  var bodyFormData = new FormData();
-  bodyFormData.append("secret", "0x653D78Bfd96255a7d25d2e7BA8724901fAF9c818");
-  bodyFormData.append("response", token_received);
-
-  console.log("bodyFormData")
-  console.log(bodyFormData)
-
+async function validate(token_received) {
+  var data = new FormData();
+  data.append("secret", "0x653D78Bfd96255a7d25d2e7BA8724901fAF9c818");
+  data.append("response", token_received);
 
   var config = {
     method: "post",
     url: "https://hcaptcha.com/siteverify",
-    data: bodyFormData,
-    headers: {'Content-Type': 'multipart/form-data' }
+    headers: {},
+    data: data,
   };
 
-  axios(config)
+  await axios(config)
     .then(function (response) {
       console.log(JSON.stringify(response.data));
       try {
@@ -87,19 +46,115 @@ function validate(token_received) {
       console.log("user cant register");
       return false;
     });
-	*/
 }
 
-function generatePassword() {
-  var length = 8,
-    charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-    retVal = "";
-  for (var i = 0, n = charset.length; i < length; ++i) {
-    retVal += charset.charAt(Math.floor(Math.random() * n));
+/*
+const asyncRegister = () => {
+    return new Promise((resolve, reject) => {
+        // Where someAsyncFunction takes a callback, i.e. api call
+        someAsyncFunction(data => {
+            resolve(data)
+        })
+    })
+}
+
+export default asyncRegister
+*/
+
+/**
+ * User registration.
+ *
+ * @param {string}      firstName
+ * @param {string}      lastName
+ * @param {string}      email
+ * @param {string}      password
+ *
+ * @returns {Object}
+ */
+/*
+function registrar(req, res) {
+  try {
+    // Extract the validation errors from a request.
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log("token");
+      console.log(req.body.token);
+      console.log("Error");
+      console.log(errors);
+
+      // Display sanitized values/errors messages.
+      return apiResponse.validationErrorWithData(
+        res,
+        "Validation Error.",
+        errors.array()
+      );
+    } else {
+      if (validate(req.body.token)) {
+        console.log("gg");
+      } else {
+        console.log("ici");
+      }
+
+      //hash input password
+      bcrypt.hash("req.body.password", 10, function (err, hash) {
+        // generate OTP for confirmation
+        let username_random = utility.randomNumber(4);
+        // Create User object with escaped and trimmed data
+
+        var ip =
+          req.headers["x-forwarded-for"] ||
+          req.connection.remoteAddress ||
+          req.ip;
+
+        console.log("IP");
+        console.log(ip);
+        //console.log(req.headers['x-forwarded-for']);
+        //console.log(req.connection.remoteAddress);
+        //console.log(req.ip);
+
+        var user = new UserModel({
+          username: "raul" + username_random,
+          //ipaddress: "127.0.0.1",
+          ipaddress: ip,
+          password: hash,
+          status: true,
+        });
+        console.log("user");
+        console.log(user);
+
+        user.save(function (err) {
+          if (err) {
+            return apiResponse.ErrorResponse(res, err);
+          }
+
+          let userData = {
+            _id: user._id,
+            username: user.username,
+            password: user.password,
+          };
+          //Prepare JWT token for authentication
+          const jwtPayload = userData;
+          const jwtData = {
+            expiresIn: process.env.JWT_TIMEOUT_DURATION,
+          };
+          const secret = process.env.JWT_SECRET;
+          //Generated JWT token with Payload and secret.
+          userData.token = jwt.sign(jwtPayload, secret, jwtData);
+          return apiResponse.successResponseWithData(
+            res,
+            "Registration Success.",
+            userData
+          );
+        });
+      });
+    }
+  } catch (err) {
+    //throw error in json response with status 500.
+    return apiResponse.ErrorResponse(res, err);
   }
-  return retVal;
 }
-
+exports.validate = validate();
+*/
 /**
  * User registration.
  *
@@ -136,99 +191,8 @@ exports.register = [
           errors.array()
         );
       } else {
-        //console.log((req.body.token).substr((req.body.token).length - 25));
-        /*
-        var validated = null;
-        validated = validate(req.body.token);
-        console.log(validated);
-        console.log(typeof validated);
-		*/
-
-        var token_received = req.body.token;
-        console.log(token_received);
-        console.log(token_received.substr(token_received.length - 25));
-
-        axios
-          .post(
-            "https://hcaptcha.com/siteverify",
-            querystring.stringify({
-              secret: "0x653D78Bfd96255a7d25d2e7BA8724901fAF9c818",
-              response: token_received,
-            })
-          )
-          .then(function (response) {
-            console.log(JSON.stringify(response.data));
-            try {
-              if (response.data.success == true) {
-                console.log("user registered correctly");
-                bcrypt.hash(generatePassword(), 10, function (err, hash) {
-                  // generate OTP for confirmation
-                  let username_random = utility.randomNumber(4);
-                  // Create User object with escaped and trimmed data
-
-                  var ip =
-                    req.headers["x-forwarded-for"] ||
-                    req.connection.remoteAddress ||
-                    req.ip;
-
-                  console.log("IP");
-                  console.log(ip);
-                  //console.log(req.headers['x-forwarded-for']);
-                  //console.log(req.connection.remoteAddress);
-                  //console.log(req.ip);
-
-                  var user = new UserModel({
-                    username: "raul" + username_random,
-                    //ipaddress: "127.0.0.1",
-                    ipaddress: ip,
-                    password: hash,
-                    status: true,
-                  });
-                  console.log("user");
-                  console.log(user);
-
-                  user.save(function (err) {
-                    if (err) {
-                      return apiResponse.ErrorResponse(res, err);
-                    }
-
-                    let userData = {
-                      _id: user._id,
-                      username: user.username,
-                      password: user.password,
-                    };
-                    //Prepare JWT token for authentication
-                    const jwtPayload = userData;
-                    const jwtData = {
-                      expiresIn: process.env.JWT_TIMEOUT_DURATION,
-                    };
-                    const secret = process.env.JWT_SECRET;
-                    //Generated JWT token with Payload and secret.
-                    userData.token = jwt.sign(jwtPayload, secret, jwtData);
-                    return apiResponse.successResponseWithData(
-                      res,
-                      "Registration Success.",
-                      userData
-                    );
-                  });
-                });
-              } else {
-                console.log("validation failed");
-                console.log("user cant register");
-              }
-            } catch (error) {
-              console.log("json error");
-              console.log("user cant register");
-            }
-          })
-          .catch(function (error) {
-            console.log(error);
-            console.log("user cant register");
-          });
-
         //hash input password
-        /*
-        bcrypt.hash(generatePassword(), 10, function (err, hash) {
+        bcrypt.hash("req.body.password", 10, function (err, hash) {
           // generate OTP for confirmation
           let username_random = utility.randomNumber(4);
           // Create User object with escaped and trimmed data
@@ -279,7 +243,6 @@ exports.register = [
             );
           });
         });
-		*/
       }
     } catch (err) {
       //throw error in json response with status 500.
