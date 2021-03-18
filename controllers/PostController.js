@@ -305,7 +305,7 @@ exports.postDetail = [
     try {
       Post.aggregate([
         {
-          $match: { _id: mongoose.Types.ObjectId(req.params.id)},
+          $match: { _id: mongoose.Types.ObjectId(req.params.id) },
         },
         /**/
         {
@@ -314,9 +314,46 @@ exports.postDetail = [
             localField: "user",
             foreignField: "_id",
             as: "user",
-            
           },
         },
+        {
+          $lookup: {
+            from: "comments",
+            let: { postId: "$_id" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$post", "$$postId"] } } },
+              {
+                $lookup: {
+                  from: "users",
+                  let: { addressId: "$user" },
+                  pipeline: [
+                    { $match: { $expr: { $eq: ["$_id", "$$addressId"] } } },
+                  ],
+                  as: "address",
+                },
+              },
+            ],
+            as: "address",
+          },
+        },
+        /*
+        { "$lookup": {
+          "from": "comments",
+          "let": { "partyId": "$_id" },
+          "pipeline": [
+            { "$match": { "$expr": { "$eq": ["$party_id", "$$partyId"] }}},
+            { "$lookup": {
+              "from": "addressComment",
+              "let": { "addressId": "$_id" },
+              "pipeline": [
+                { "$match": { "$expr": { "$eq": ["$address_id", "$$addressId"] }}}
+              ],
+              "as": "address"
+            }}
+          ],
+          "as": "address"
+        }},
+        { "$unwind": "$address" },*/
         {
           $lookup: {
             from: "comments",
@@ -325,13 +362,32 @@ exports.postDetail = [
             as: "comments",
             /*
             pipeline: [
+              { $lookup: {
+                from: users,                                                         
+                let: { _id: mongoose.Types.ObjectId($user) },
+                as: address
+              }}
+            ],*/
+            /*
+            pipeline: [
               { $match: { $expr: { $eq: [$user, $$_id] }}},
+              { $lookup: {
+                from: users,                                                         
+                let: { _id: $user },
+                as: address
+              }}
+            ],
+            */
+            /*
+            pipeline: [
+              { $match: { $user: mongoose.Types.ObjectId($$_id)}},
               { $lookup: {
                 from: users,
                 let: { _id: $user },
                 as: address
               }}
-            ],*/
+            ],
+            */
           },
         },
         {
@@ -347,7 +403,7 @@ exports.postDetail = [
 
             "user.username": 1,
             "user._id": 1,
-          }
+          },
         },
         { $limit: 1 },
       ]).then((post) => {
@@ -356,16 +412,55 @@ exports.postDetail = [
           console.log(post);
           console.log(typeof post);
           console.log(post[0]);
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            post[0]
-          );
-        }
-        else{
+
+          /*
+          COMENTS
+          */
+          Comment.aggregate([
+            
+            {
+              $match: { post: mongoose.Types.ObjectId(req.params.id) },
+            },
+            
+            {
+              $lookup: {
+                from: "users",
+                localField: "user",
+                foreignField: "_id",
+                as: "user",
+              },
+              
+            },
+            
+            {
+              $project: {
+                _id: 1,
+                text: 1,
+                post: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                inResponseTo: 1,
+                //"comments.post": 0,
+
+                "user.username": 1,
+                "user._id": 1,
+              },
+              
+            },
+
+          ]).then((comentarios) => {
+            console.log("comentarios");
+            console.log(comentarios);
+            post[0].comentarios = comentarios;
+            return apiResponse.successResponseWithData(
+              res,
+              "Operation success",
+              post[0]
+            );
+          });
+        } else {
           console.log("🎅❌❌❌❌❌ no post");
           return apiResponse.ErrorResponse(res, "the id is wrong");
-          
         }
       });
     } catch (err) {

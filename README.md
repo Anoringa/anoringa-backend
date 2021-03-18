@@ -58,7 +58,7 @@ If you consider my project as helpful stuff, You can appreciate me or my hard wo
 1.  Clone the project from github. Change "myproject" to your project name.
 
 ```bash
-git clone https://github.com/maitraysuthar/rest-api-nodejs-mongodb.git ./myproject
+git clone https://github.com/maitr aysuthar/rest-api-nodejs-mongodb.git ./myproject
 ```
 
 ### Using manual download ZIP
