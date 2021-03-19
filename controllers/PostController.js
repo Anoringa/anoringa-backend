@@ -417,11 +417,10 @@ exports.postDetail = [
           COMENTS
           */
           Comment.aggregate([
-            
             {
               $match: { post: mongoose.Types.ObjectId(req.params.id) },
             },
-            
+
             {
               $lookup: {
                 from: "users",
@@ -429,9 +428,8 @@ exports.postDetail = [
                 foreignField: "_id",
                 as: "user",
               },
-              
             },
-            
+
             {
               $project: {
                 _id: 1,
@@ -445,9 +443,7 @@ exports.postDetail = [
                 "user.username": 1,
                 "user._id": 1,
               },
-              
             },
-
           ]).then((comentarios) => {
             console.log("comentarios");
             console.log(comentarios);
@@ -530,9 +526,13 @@ exports.postStore = [
       });
     }),
   //body("title", "Title must not be empty.").isLength({ min: 1 }).trim(),
-  body("description", "Description must not be empty.")
-    .isLength({ min: 1 })
-    .trim(),
+
+  body("description")
+    .isLength({ min: 5 })
+    .trim()
+    .withMessage("Description must not be empty."),
+  // Sanitize fields.
+  sanitizeBody("description").escape(),
   body("photo", "Photo must not be empty.").isLength({ min: 1 }).trim(),
   /*
 	body("isbn", "ISBN must not be empty").isLength({ min: 1 }).trim().custom((value,{req}) => {
@@ -545,89 +545,102 @@ exports.postStore = [
   sanitizeBody("*").escape(),
   (req, res) => {
     try {
-      console.log("try");
+      if (
+        req.body.description != "" &&
+        req.body.photo != "" &&
+        req.body.title != ""
+      ) {
+        console.log("try");
 
-      const secret = process.env.JWT_SECRET;
-      /*
-        jwt.verify(authorization, secret, function (err, decoded) {
-          if (err) {
-			console.log("test");
-            console.log(err);
-          } else {
-			console.log("test");
-            console.log(decoded);
-          }
-		});
-		*/
-
-      /*
-
-
-      if (req.headers && req.headers.authorization) {
-        var authorization = req.headers.authorization.split(" ")[1],
-          decoded;
-
-
-        try {
-          console.log("secret");
-          console.log(secret);
-          console.log("authorization");
-          console.log(authorization);
-
-          //decoded = jwt.verify(authorization, secret);
-		  //console.log(decoded) // bar
-		  var decoded = jwt_decode(authorization);
-	   
-        } catch (err) {
-          //throw error in json response with status 500.
-
-          console.log("unauthorized");
-          console.log(err);
-          //return res.status(401).send('unauthorized');
-          return apiResponse.ErrorResponse(res, err);
-        }
-        var userId = decoded;
-        // Fetch the user by id
-        console.log("decoded");
-        console.log(userId);
-	  }
-	  */
-
-      const errors = validationResult(req);
-      var post = new Post({
-        title: req.body.title,
-        user: req.user,
-        description: req.body.description,
-        photo: req.body.photo,
-        //isbn: req.body.isbn,
+        const secret = process.env.JWT_SECRET;
+        /*
+          jwt.verify(authorization, secret, function (err, decoded) {
+            if (err) {
+        console.log("test");
+              console.log(err);
+            } else {
+        console.log("test");
+              console.log(decoded);
+            }
       });
-      console.log("post");
-      console.log(post);
+      */
 
-      if (!errors.isEmpty()) {
-        console.log("book not saved");
+        /*
+  
+  
+        if (req.headers && req.headers.authorization) {
+          var authorization = req.headers.authorization.split(" ")[1],
+            decoded;
+  
+  
+          try {
+            console.log("secret");
+            console.log(secret);
+            console.log("authorization");
+            console.log(authorization);
+  
+            //decoded = jwt.verify(authorization, secret);
+        //console.log(decoded) // bar
+        var decoded = jwt_decode(authorization);
+       
+          } catch (err) {
+            //throw error in json response with status 500.
+  
+            console.log("unauthorized");
+            console.log(err);
+            //return res.status(401).send('unauthorized');
+            return apiResponse.ErrorResponse(res, err);
+          }
+          var userId = decoded;
+          // Fetch the user by id
+          console.log("decoded");
+          console.log(userId);
+      }
+      */
+
+        const errors = validationResult(req);
+        var post = new Post({
+          title: req.body.title,
+          user: req.user,
+          description: req.body.description,
+          photo: req.body.photo,
+          //isbn: req.body.isbn,
+        });
+        console.log("post");
+        console.log(post);
+
+        if (!errors.isEmpty()) {
+          console.log("post not saved");
+          return apiResponse.validationErrorWithData(
+            res,
+            "Validation Error.",
+            errors.array()
+          );
+        } else {
+          //Save book.
+          console.log("Save post");
+          post.save(function (err) {
+            if (err) {
+              return apiResponse.ErrorResponse(res, err);
+            }
+            let postData = new PostData(post);
+            return apiResponse.successResponseWithData(
+              res,
+              "Post add Success.",
+              postData
+            );
+          });
+        }
+      } else {
+        console.log("post not saved");
         return apiResponse.validationErrorWithData(
           res,
           "Validation Error.",
           errors.array()
         );
-      } else {
-        //Save book.
-        console.log("Save book");
-        post.save(function (err) {
-          if (err) {
-            return apiResponse.ErrorResponse(res, err);
-          }
-          let postData = new PostData(post);
-          return apiResponse.successResponseWithData(
-            res,
-            "Post add Success.",
-            postData
-          );
-        });
       }
     } catch (err) {
-      console.log("Error book");
+      console.log("Error post");
       //throw error in json response with status 500.
       return apiResponse.ErrorResponse(res, err);
     }

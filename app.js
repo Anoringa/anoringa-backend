@@ -201,7 +201,7 @@ io.on("connection", function (socket) {
         //return Promise.reject("Post already exist with this title");
       } else {
         console.log("Post Create");
-        console.log(post);
+        //console.log(post);
         User.findOne({ username: data.username }).then((user) => {
           if (user) {
             console.log("User exist with this username");
@@ -213,25 +213,34 @@ io.on("connection", function (socket) {
               //return Promise.reject("Post already exist with this title");
 
               console.log("post settings");
+
               console.log(data.title);
               console.log(data.description);
               console.log(data.photo);
-              if (data.photo == "" || data.photo == null) {
-                data.photo = "http://placekitten.com/300/300";
+              if (
+                data.title != "" && data.title != undefined && data.title != null &&
+                data.description != "" && data.description != undefined && data.description != null &&
+                data.photo != "" && data.photo != undefined && data.photo != null 
+              ) {
+                if (data.photo == "" || data.photo == null) {
+                  data.photo = "http://placekitten.com/300/300";
+                }
+                var postData = new Post({
+                  title: data.title,
+                  description: data.description,
+                  user: user._id,
+                  photo: data.photo,
+                });
+
+                postData.save();
+
+                console.log("\n>> Post Created:\n", postData);
+                socket.broadcast.emit("post", postData);
+                return callback(postData);
+                //return postData;
+              } else {
+                console.log("some data comes with an error");
               }
-              var postData = new Post({
-                title: data.title,
-                description: data.description,
-                user: user._id,
-                photo: data.photo,
-              });
-
-              postData.save();
-
-              console.log("\n>> Post Created:\n", postData);
-              socket.broadcast.emit("post", postData);
-              return callback(postData);
-              //return postData;
             } else {
               console.log("User password wrong");
             }
