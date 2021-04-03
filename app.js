@@ -8,6 +8,49 @@ var apiRouter = require("./routes/api");
 var apiResponse = require("./helpers/apiResponse");
 var cors = require("cors");
 
+var postPhoto = require("./helpers/postPhotoHelper");
+
+
+var axios = require("axios");
+var FormData = require('form-data');
+
+
+async function imgurUP(base64image) {
+  console.log("imgurUP start");
+
+  console.log("base64code");
+  console.log(base64image);
+  var res = base64image.split(",");
+  console.log(res[1]);
+
+  var data = new FormData();
+  data.append("image", res[1]);
+
+  var config = {
+    method: "post",
+    url: "https://api.imgur.com/3/image",
+    headers: {
+      Authorization: "Client-ID 3874349859f507b",
+    },
+    data: data,
+  };
+
+  var self = this;
+  await axios(config)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+      console.log(response.data.data.link);
+      console.log();
+      //self.setImageUploadedUrl(response.data.data.link);
+      return response.data.data.link;
+    })
+    .catch(function (error) {
+      //self.setImageUploadedUrl(false);
+      console.log(error);
+      return false;
+    });
+}
+
 // Server configuration
 var SERVER_ADDRESS = process.env.SERVER_ADDRESS;
 var SERVER_PORT = process.env.SERVER_PORT;
@@ -89,9 +132,9 @@ var server = app.listen(process.env.PORT || 3000, function () {
 const io = require("socket.io").listen(server).set("log level", 0);
 /*
 const io = require('socket.io')(8888, {
-	cors: {
-	  origin: '*',
-	}
+  cors: {
+    origin: '*',
+  }
   });
 */
 
@@ -118,10 +161,10 @@ io.on("connection", function (socket) {
     /*
     username
     password
-	  post
+    post
     text
     inResponseTo
-	  */
+    */
 
     Post.findOne({ _id: data.postid }).then((post) => {
       if (post) {
@@ -186,14 +229,14 @@ io.on("connection", function (socket) {
 io.on("connection", function (socket) {
   socket.on("post", function (data, callback) {
     /*
-		  title: String,
-		  description: String,
-		  by: String,
-		  url: String,
-	  user
-	  post
-	  content
-	  */
+      title: String,
+      description: String,
+      by: String,
+      url: String,
+    user
+    post
+    content
+    */
 
     Post.findOne({ title: data.title }).then((post) => {
       if (post) {
@@ -202,7 +245,8 @@ io.on("connection", function (socket) {
       } else {
         console.log("Post Create");
         //console.log(post);
-        User.findOne({ username: data.username }).then((user) => {
+        //User.findOne({ username: data.username }).then((user) => {
+        User.findOne({ _id: data._id }).then((user) => {
           if (user) {
             console.log("User exist with this username");
             console.log(user);
@@ -220,24 +264,76 @@ io.on("connection", function (socket) {
               if (
                 data.title != "" && data.title != undefined && data.title != null &&
                 data.description != "" && data.description != undefined && data.description != null &&
-                data.photo != "" && data.photo != undefined && data.photo != null 
+                data.photo.content != "" && data.photo.content != undefined && data.photo.content != null
               ) {
-                if (data.photo == "" || data.photo == null) {
-                  data.photo = "http://placekitten.com/300/300";
-                }
-                var postData = new Post({
-                  title: data.title,
-                  description: data.description,
-                  user: user._id,
-                  photo: data.photo,
+
+                //postPhoto.upload().then()
+                console.log("before");
+                postPhoto.upload(data.photo)
+                  .then(function (v) {
+                    // `delay` returns a promise
+                    console.log(v + " gg photo"); // Log the value once it is resolved
+
+                    if (v != "error") {
+                      var postData = new Post({
+                        title: data.title,
+                        description: data.description,
+                        user: user._id,
+                        photo: v,
+                      });
+  
+                      postData.save();
+  
+                      console.log("\n>> Post Created:\n", postData);
+                      socket.broadcast.emit("post", postData);
+                      return callback(postData);
+                      //return postData;
+                      
+                    } else {
+                      console.log(v + " no casi gg"); // Log the value once it is resolved
+                      console.log("some error with the upload");
+                      
+                    }
+                  })
+                  .catch(function (v) {
+                    // Or do something else if it is rejected
+                    console.log(v + " nogg"); // Log the value once it is resolved
+                    console.log("some error with the upload");
+                    // (it would not happen in this example, since `reject` is not called).
+                  });
+                console.log("after");
+
+
+
+                /*
+              if (data.photo.value.type == "photo" || data.photo.value.source == "upload") {
+                await imgurUP(data.photo.content).then(function (battery) {
+                  console.log("battery");
+                  console.log(battery);
+                  data.photo.content = battery;
                 });
+                //data.photo.content = varita;
+              }
 
-                postData.save();
+              if (data.photo.content == "" || data.photo.content == null) {
+                data.photo.value.type = "photo"
+                data.photo.value.source = "URL"
+                data.photo.content = "http://placekitten.com/300/300";
+              }
+              var postData = new Post({
+                title: data.title,
+                description: data.description,
+                user: user._id,
+                photo: data.photo.content,
+              });
 
-                console.log("\n>> Post Created:\n", postData);
-                socket.broadcast.emit("post", postData);
-                return callback(postData);
-                //return postData;
+              postData.save();
+
+              console.log("\n>> Post Created:\n", postData);
+              socket.broadcast.emit("post", postData);
+              return callback(postData);
+              //return postData;
+              */
               } else {
                 console.log("some data comes with an error");
               }

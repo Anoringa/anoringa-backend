@@ -6,7 +6,11 @@ var PostSchema = new Schema(
   {
     title: { type: String, required: true },
     description: { type: String, required: true },
-    photo: { type: String, required: true },
+    photo: { 
+      type: Object,
+      //type: String, 
+      required: true 
+    },
     user: {
       type: Schema.ObjectId,
       ref: "User",
