@@ -1,5 +1,6 @@
 //import "./styles.css";
 const axios = require("axios");
+const { v4: uuidv4 } = require('uuid');
 
 
 
@@ -78,10 +79,10 @@ exports.upload = function (photdata){
       //https://thomas-rubattel.medium.com/strategy-pattern-in-functional-programming-38ddcc2b2d50
       //https://refactoring.guru/es/design-patterns/strategy
       imagekit.upload({
-        folder: "anoringa",
+        //folder: "anoringa",
         file: photdata.content, //required
-        fileName: "my_file_name.jpg",   //required
-        tags: ["t-shirt", "summer", "men"]
+        fileName: uuidv4(), // ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',   //required
+        tags: ["anoringa", "alpha", "2021"]
       })
         .then(response => {
           console.log("ok");

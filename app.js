@@ -263,8 +263,8 @@ io.on("connection", function (socket) {
               console.log(data.photo);
               if (
                 data.title != "" && data.title != undefined && data.title != null &&
-                data.description != "" && data.description != undefined && data.description != null &&
-                data.photo.content != "" && data.photo.content != undefined && data.photo.content != null
+                data.description != "" && data.description != undefined && data.description != null 
+                // && data.photo.content != "" && data.photo.content != undefined && data.photo.content != null
               ) {
 
                 //postPhoto.upload().then()

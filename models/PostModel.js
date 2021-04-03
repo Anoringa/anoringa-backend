@@ -7,7 +7,7 @@ var PostSchema = new Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     photo: { 
-      type: Object,
+      type: Schema.Types.Mixed,
       //type: String, 
       required: true 
     },
