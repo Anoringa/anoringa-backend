@@ -11,6 +11,8 @@ const { constants } = require("../helpers/constants");
 var axios = require("axios");
 var FormData = require("form-data");
 var querystring = require("querystring");
+var generator = require('generate-password');
+
 
 function validate(token_received) {
   console.log("validating");
@@ -22,7 +24,7 @@ function validate(token_received) {
     .post(
       "https://hcaptcha.com/siteverify",
       querystring.stringify({
-        secret: "0x653D78Bfd96255a7d25d2e7BA8724901fAF9c818",
+        secret: process.env.HCAPTCHA_SECRET,
         response: token_received,
       })
     )
@@ -50,7 +52,7 @@ function validate(token_received) {
     });
   /*
   var bodyFormData = new FormData();
-  bodyFormData.append("secret", "0x653D78Bfd96255a7d25d2e7BA8724901fAF9c818");
+  bodyFormData.append("secret", process.env.HCAPTCHA_SECRET);
   bodyFormData.append("response", token_received);
 
   console.log("bodyFormData")
@@ -91,12 +93,18 @@ function validate(token_received) {
 }
 
 function generatePassword() {
+  /*
   var length = 8,
     charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
     retVal = "";
   for (var i = 0, n = charset.length; i < length; ++i) {
     retVal += charset.charAt(Math.floor(Math.random() * n));
-  }
+  }*/
+  //https://www.npmjs.com/package/generate-password
+  var retVal = generator.generate({
+    length: 10,
+    numbers: true
+  });
   return retVal;
 }
 
@@ -152,7 +160,7 @@ exports.register = [
           .post(
             "https://hcaptcha.com/siteverify",
             querystring.stringify({
-              secret: "0x653D78Bfd96255a7d25d2e7BA8724901fAF9c818",
+              secret: process.env.HCAPTCHA_SECRET,
               response: token_received,
             })
           )
@@ -170,6 +178,8 @@ exports.register = [
                     req.headers["x-forwarded-for"] ||
                     req.connection.remoteAddress ||
                     req.ip;
+                  //esta es una herramienta que nos ayudara mas tarde jijio
+                  // *insert meme here*
 
                   console.log("IP");
                   console.log(ip);

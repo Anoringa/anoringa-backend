@@ -3,7 +3,7 @@ var FormData = require("form-data");
 
 function validate(token_received) {
   var data = new FormData();
-  data.append("secret", "0x653D78Bfd96255a7d25d2e7BA8724901fAF9c818");
+  data.append("secret", process.env.HCAPTCHA_SECRET);
   data.append("response", token_received);
 
   var config = {

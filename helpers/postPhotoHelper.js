@@ -8,9 +8,9 @@ var ImageKit = require("imagekit");
 var fs = require('fs');
 
 var imagekit = new ImageKit({
-  publicKey: "public_rdtw5bxA4XfFY2hMalAwYnVgN9U=",
-  privateKey: "private_q/ERDzKGaJ6PaAjid7Q2BK3D1ig=",
-  urlEndpoint: "https://ik.imagekit.io/ym5grvwvw2m"
+  publicKey: process.env.IMAGEKIT_PUBLICKEY,
+  privateKey: process.env.IMAGEKIT_PRIVATEKEY,
+  urlEndpoint: process.env.IMAGEKIT_ENDPOINT
 });
 
 
