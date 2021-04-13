@@ -120,7 +120,7 @@ app.use(cors(corsOptions));
 */
 
 //var server = app.listen(SERVER_PORT, SERVER_ADDRESS, function () {
-var server = app.listen(process.env.PORT || 3000, function () {
+var server = app.listen(SERVER_PORT || 3000, SERVER_ADDRESS || '0.0.0.0', function () {
   console.log(
     "App server up and running on %s and port %s",
     server.address().address,
@@ -166,13 +166,15 @@ io.on("connection", function (socket) {
     inResponseTo
     */
 
-    Post.findOne({ _id: data.postid }).then((post) => {
+    Post.findOne({ _id: data.postid })
+    .then((post) => {
       if (post) {
         console.log("Post exist");
         //return Promise.reject("Post already exist with this title");
 
         console.log(post);
-        User.findOne({ username: data.username }).then((user) => {
+        User.findOne({ username: data.username })
+        .then((user) => {
           if (user) {
             console.log("User exist with this username");
             console.log(user);
@@ -211,11 +213,13 @@ io.on("connection", function (socket) {
             //var user = User.findOne({ username: data.username });
             //console.log(user);
           }
-        });
+        })
+        .catch((err) => { console.log('audienceService', err);})
       } else {
         console.log("Post dont exist");
       }
-    });
+    })
+    .catch((err) => { console.log('audienceService', err);})
     /*
     var userer = db.User.find({ username: data.username });
     console.log(userer);
@@ -238,7 +242,8 @@ io.on("connection", function (socket) {
     content
     */
 
-    Post.findOne({ title: data.title }).then((post) => {
+    Post.findOne({ title: data.title })
+    .then((post) => {
       if (post) {
         console.log("Post already exist with this title");
         //return Promise.reject("Post already exist with this title");
@@ -348,7 +353,8 @@ io.on("connection", function (socket) {
           }
         });
       }
-    });
+    })
+    .catch((err) => { console.log('audienceService', err);})
   });
 });
 
