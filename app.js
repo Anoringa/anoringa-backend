@@ -120,13 +120,14 @@ app.use(cors(corsOptions));
 */
 
 //var server = app.listen(SERVER_PORT, SERVER_ADDRESS, function () {
-var server = app.listen(SERVER_PORT || 3000, SERVER_ADDRESS || '0.0.0.0', function () {
+var server = app.listen(process.env.PORT || 3000, function () {
   console.log(
     "App server up and running on %s and port %s",
     server.address().address,
     server.address().port
   );
 });
+// , SERVER_ADDRESS || '0.0.0.0'
 //var server = app.listen(3000,'0.0.0.0',function(){console.log("App server up and running on %s and port %s",server.address().address ,server.address().port);});
 
 const io = require("socket.io").listen(server).set("log level", 0);
