@@ -6,7 +6,7 @@ require("dotenv").config();
 var indexRouter = require("./routes/index");
 var apiRouter = require("./routes/api");
 var apiResponse = require("./helpers/apiResponse");
-var cors = require("cors");
+//var cors = require("cors");
 
 var postPhoto = require("./helpers/postPhotoHelper");
 
@@ -76,6 +76,19 @@ var db = mongoose.connection;
 
 var app = express();
 
+// Configurar cabeceras y cors
+// '*',
+app.use((req, res, next) => {
+  //res.header('Access-Control-Allow-Origin',  'http://test.mydomain.com');
+  res.header('Access-Control-Allow-Origin',  '*');
+  res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
+  next();
+});
+
+
+
 //don't show the log when it is test
 if (process.env.NODE_ENV !== "test") {
   app.use(logger("dev"));
@@ -86,7 +99,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 //To allow cross-origin requests
-app.use(cors());
+//app.use(cors());
 
 //Route Prefixes
 app.use("/", indexRouter);
@@ -118,6 +131,11 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 */
+
+
+
+
+
 
 //var server = app.listen(SERVER_PORT, SERVER_ADDRESS, function () {
 var server = app.listen(process.env.PORT || 3000, function () {
