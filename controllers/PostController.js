@@ -107,7 +107,137 @@ exports.bookList = [
     }
   },
 ];
+
+
 exports.postList = [
+  (req, res) => {
+    try {
+
+      Post.aggregate([
+        /**/
+        {
+          $lookup: {
+            from: "users",
+            localField: "user",
+            foreignField: "_id",
+            as: "user",
+          },
+        },
+        {
+          $lookup: {
+            from: "comments",
+            let: { postId: "$_id" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$post", "$$postId"] } } },
+              {
+                $lookup: {
+                  from: "users",
+                  let: { addressId: "$user" },
+                  pipeline: [
+                    { $match: { $expr: { $eq: ["$_id", "$$addressId"] } } },
+                  ],
+                  as: "address",
+                },
+              },
+            ],
+            as: "address",
+          },
+        },
+        /*
+        { "$lookup": {
+          "from": "comments",
+          "let": { "partyId": "$_id" },
+          "pipeline": [
+            { "$match": { "$expr": { "$eq": ["$party_id", "$$partyId"] }}},
+            { "$lookup": {
+              "from": "addressComment",
+              "let": { "addressId": "$_id" },
+              "pipeline": [
+                { "$match": { "$expr": { "$eq": ["$address_id", "$$addressId"] }}}
+              ],
+              "as": "address"
+            }}
+          ],
+          "as": "address"
+        }},
+        { "$unwind": "$address" },*/
+        {
+          $lookup: {
+            from: "comments",
+            localField: "_id",
+            foreignField: "post",
+            as: "comments",
+            /*
+            pipeline: [
+              { $lookup: {
+                from: users,                                                         
+                let: { _id: mongoose.Types.ObjectId($user) },
+                as: address
+              }}
+            ],*/
+            /*
+            pipeline: [
+              { $match: { $expr: { $eq: [$user, $$_id] }}},
+              { $lookup: {
+                from: users,                                                         
+                let: { _id: $user },
+                as: address
+              }}
+            ],
+            */
+            /*
+            pipeline: [
+              { $match: { $user: mongoose.Types.ObjectId($$_id)}},
+              { $lookup: {
+                from: users,
+                let: { _id: $user },
+                as: address
+              }}
+            ],
+            */
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            description: 1,
+            photo: 1,
+            createdAt: 1,
+            updatedAt: 1,/*
+            comments: 1,
+            */
+            numberOfColors: { $cond: { if: { $isArray: "$comments" }, then: { $size: "$comments" }, else: "NA"} },
+
+            //"comments.post": 0,
+
+            "user.username": 1,
+            "user._id": 1,
+          },
+        },
+      
+      ]).then((post) => {
+        if (post.length > 0) {
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            post
+          );
+        } else {
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            []
+          );
+        }
+      });
+    } catch (err) {
+      //throw error in json response with status 500.
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+exports.postListOld = [
   (req, res) => {
     try {
       Post.find(
