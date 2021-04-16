@@ -78,6 +78,7 @@ var app = express();
 
 // Configurar cabeceras y cors
 // '*',
+/*
 app.use((req, res, next) => {
   //res.header('Access-Control-Allow-Origin',  'http://test.mydomain.com');
   res.header('Access-Control-Allow-Origin',  '*');
@@ -87,7 +88,7 @@ app.use((req, res, next) => {
   next();
 });
 
-
+*/
 
 //don't show the log when it is test
 if (process.env.NODE_ENV !== "test") {
