@@ -13,6 +13,8 @@ var FormData = require("form-data");
 var querystring = require("querystring");
 var generator = require('generate-password');
 
+const he = require('he');
+
 
 function validate(token_received) {
   console.log("validating");
@@ -89,7 +91,7 @@ function validate(token_received) {
       console.log("user cant register");
       return false;
     });
-	*/
+  */
 }
 
 function generatePassword() {
@@ -150,7 +152,7 @@ exports.register = [
         validated = validate(req.body.token);
         console.log(validated);
         console.log(typeof validated);
-		*/
+    */
 
         var token_received = req.body.token;
         console.log(token_received);
@@ -289,7 +291,7 @@ exports.register = [
             );
           });
         });
-		*/
+    */
       }
     } catch (err) {
       //throw error in json response with status 500.
@@ -408,6 +410,196 @@ exports.login = [
       }
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+
+
+
+/**
+ * User Modify USERNAME.
+ *
+ * @param {string}      username
+ * @param {string}      password
+ * @param {string}      data
+ *
+ * @returns {Object}
+ */
+exports.modify = [
+  body("username")
+    .isLength({ min: 1 })
+    .trim()
+    .withMessage("Username must be specified.")
+    .isAlphanumeric()
+    .withMessage("Username has non-alphanumeric characters."),
+
+  body("password")
+    .isLength({ min: 1 })
+    .trim()
+    .withMessage("Password must be specified."),
+
+
+  // Validate fields.
+  body("data")
+    .isLength({ min: 1 })
+    .trim()
+    .withMessage("Data to change name must be specified."),
+  // Sanitize fields.
+  // Process request after validation and sanitization.
+
+
+  sanitizeBody("username").escape(),
+  sanitizeBody("password").escape(),
+  sanitizeBody("data").escape(),
+
+  (req, res) => {
+    try {
+      const errors = validationResult(req);
+      console.log("modify username");
+      console.log(errors.isEmpty());
+      if (!errors.isEmpty()) {
+        return apiResponse.validationErrorWithData(
+          res,
+          "Validation Error.",
+          errors.array()
+        );
+      } else {
+        console.log("step 1");
+        UserModel.findOne({ username: req.body.username })
+          .then((user) => {
+            console.log("step 2");
+            if (user) {
+              console.log("User exist with this username");
+              console.log(user);
+              console.log("password");
+              console.log(req.body.password);
+
+              let password_str = he.decode(req.body.password);
+              console.log("password2");
+              console.log(password_str);
+
+
+
+
+              if (user.password == password_str) {
+                console.log("User password OK");
+                //return Promise.reject("Post already exist with this title");
+
+                //var userData = user.toObject();
+                
+
+
+                //upsertData.username = req.body.data | user.username
+
+
+                console.log("user settings");
+                console.log(req.body.data);
+                if (req.body.data) {
+                  user.username = req.body.data // | user.username
+
+                  var userDatax = {
+                    _id: user._id,
+                    username: req.body.data,
+                    password: user.password,
+                  };
+                  console.log(JSON.stringify(userDatax));
+
+
+                  user.save(function (err) {
+                    console.log("username update");
+                    if (err) {
+                      return apiResponse.ErrorResponse(res, err);
+                    }
+                    /*
+                    return apiResponse.successResponse(
+                      res,
+                      "Confirm otp sent."
+                    );*/
+                    console.log("return new username");
+                    return apiResponse.successResponseWithData(
+                      res,
+                      "Modify Success.",
+                      userDatax
+                    );
+                  });
+                }
+                else{
+                  console.log("no new username inserted");
+
+                  return apiResponse.unauthorizedResponse(
+                    res,
+                    "New Username wrong."
+                  );
+                }
+
+
+                
+                /*
+                var user = new UserModel({
+                  username: data.username,
+                });
+                
+                // Convert the Model instance to a simple object using Model's 'toObject' function
+                // to prevent weirdness like infinite looping...
+                var userData = user.toObject();
+                
+                // Delete the _id property, otherwise Mongo will return a "Mod on _id not allowed" error
+                delete upsertData._id;
+                
+                // Do the upsert, which works like this: If no Contact document exists with 
+                // _id = contact.id, then create a new doc using upsertData.
+                // Otherwise, update the existing doc with upsertData
+                Contact.update({_id: contact.id}, upsertData, {upsert: true}, function(err{...});
+                */
+
+
+
+
+
+
+
+                //return postData;
+
+
+
+
+              } else {
+                console.log("User password wrong");
+
+                return apiResponse.unauthorizedResponse(
+                  res,
+                  "Username or Password wrong."
+                );
+              }
+
+            } else {
+              console.log("User dont exist");
+
+              return apiResponse.unauthorizedResponse(
+                res,
+                "Username or Password wrong."
+              );
+
+              //var user = User.findOne({ username: data.username });
+              //console.log(user);
+            }
+          })
+          .catch((err) => { console.log('audienceService', err); })
+        /*
+        var userer = db.User.find({ username: data.username });
+        console.log(userer);
+    
+        var poster = db.Post.find({ title: data.title });
+        console.log(poster);
+        */
+      }
+    } catch (err) {
+      //return apiResponse.ErrorResponse(res, err);
+      return apiResponse.validationErrorWithData(
+        res,
+        "Validation Error.",
+        "asdasd"
+      );
     }
   },
 ];
