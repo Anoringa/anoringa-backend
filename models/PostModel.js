@@ -11,6 +11,11 @@ var PostSchema = new Schema(
       //type: String, 
       required: true 
     },
+    music: { 
+      type: String,
+      //type: String, 
+      required: false 
+    },
     user: {
       type: Schema.ObjectId,
       ref: "User",

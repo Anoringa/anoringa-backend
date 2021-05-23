@@ -526,6 +526,7 @@ exports.postDetail = [
             title: 1,
             description: 1,
             photo: 1,
+            music: 1,
             createdAt: 1,
             updatedAt: 1,
             comments: 1,

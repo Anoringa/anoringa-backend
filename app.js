@@ -252,6 +252,10 @@ io.on("connection", function (socket) {
 
 io.on("connection", function (socket) {
   socket.on("post", function (data, callback) {
+    console.log("---------------");
+    console.log("la data");
+    console.log(data);
+    console.log("---------------");
     /*
       title: String,
       description: String,
@@ -266,7 +270,7 @@ io.on("connection", function (socket) {
     .then((post) => {
       if (post) {
         console.log("Post already exist with this title");
-        //return Promise.reject("Post already exist with this title");
+        return Promise.reject("Post already exist with this title");
       } else {
         console.log("Post Create");
         //console.log(post);
@@ -298,13 +302,17 @@ io.on("connection", function (socket) {
                   .then(function (v) {
                     // `delay` returns a promise
                     console.log(v + " gg photo"); // Log the value once it is resolved
+                    
 
+
+                    var muzica = data.music || false
                     if (v != "error") {
                       var postData = new Post({
                         title: data.title,
                         description: data.description,
-                        user: user._id,
                         photo: v,
+                        music: muzica,
+                        user: user._id,
                       });
   
                       postData.save();
@@ -367,6 +375,7 @@ io.on("connection", function (socket) {
             }
           } else {
             console.log("User dont exist");
+            console.log(data);
 
             //var user = User.findOne({ username: data.username });
             //console.log(user);
