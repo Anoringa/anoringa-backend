@@ -210,7 +210,8 @@ exports.postList = [
               //then  : { $arrayElemAt: [ { $slice: [ "$comments.createdAt", -1 ]}, 0 ] },
               //then  : { $slice: [ "$comments.createdAt", -1 ]},
               //else  : false
-              else  : "2020-11-30T05:12:21.308Z"
+              else  : [ "2020-11-30T00:00:00.000Z"],
+              //else  : false
             }},
             //lastComment: { $cond: {if: { $eq: [ { $size: "$comments" }, 0 ] },then  : false,else  : true}},
 
