@@ -198,6 +198,29 @@ exports.postList = [
           },
         },
         {
+          "$addFields": {
+            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $arrayElemAt: ["$comments.createdAt", -1] }, else: "NA" } },
+            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $arrayElemAt: [ { $slice: [ "$comments.createdAt", -1 ]}, 0 ] }, else: "NA" } },
+            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $arrayElemAt: ["$comments.createdAt", -1] }, else: "NA" } },
+            
+            lastComment: { $cond: {
+              if    : { $not: { $eq: [ { $size: "$comments" }, 0 ] } },
+              then  : { $slice: [ "$comments.createdAt",-1 ]} ,
+              //then  : { $arrayElemAt: [{ $slice: [ "$comments.createdAt",-1 ]}, 0] } ,
+              //then  : { $arrayElemAt: [ { $slice: [ "$comments.createdAt", -1 ]}, 0 ] },
+              //then  : { $slice: [ "$comments.createdAt", -1 ]},
+              //else  : false
+              else  : "2020-11-30T05:12:21.308Z"
+            }},
+            //lastComment: { $cond: {if: { $eq: [ { $size: "$comments" }, 0 ] },then  : false,else  : true}},
+
+
+
+            numberOfColors: { $cond: { if: { $isArray: "$comments" }, then: { $size: "$comments" }, else: "NA" } },
+            countOfComments: { $cond: { if: { $isArray: "$comments" }, then: { $size: "$comments" }, else: "NA" } },
+          }
+        },
+        {
           $project: {
             _id: 1,
             title: 1,
@@ -207,15 +230,26 @@ exports.postList = [
             updatedAt: 1,/*
             comments: 1,
             */
-            numberOfColors: { $cond: { if: { $isArray: "$comments" }, then: { $size: "$comments" }, else: "NA"} },
-
+            //numberOfColors: { $cond: { if: { $isArray: "$comments" }, then: { $size: "$comments" }, else: "NA" } },
+            numberOfColors: 1,
+            countOfComments: 1,
+            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $slice: [ "$comments.createdAt", -1 ]}, else: "NA" } },
+            //lastComment: { $arrayElemAt: [ { $slice: [ "$comments.createdAt", -1 ]}, 0 ] },
+            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $arrayElemAt: [ { $slice: [ "$comments.createdAt", -1 ]}, 0 ] }, else: "NA" } },
+            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $arrayElemAt: [ "$comments.createdAt", -1 ]}, else: "" } },
+            lastComment: 1,
             //"comments.post": 0,
 
             "user.username": 1,
             "user._id": 1,
           },
         },
-      
+        {
+          $sort: {
+            "recommendCount": -1
+          }
+        },
+
       ]).then((post) => {
         if (post.length > 0) {
           return apiResponse.successResponseWithData(
@@ -666,13 +700,13 @@ exports.postStore = [
   sanitizeBody("description").escape(),
   body("photo", "Photo must not be empty.").isLength({ min: 1 }).trim(),
   /*
-	body("isbn", "ISBN must not be empty").isLength({ min: 1 }).trim().custom((value,{req}) => {
-		return Book.findOne({isbn : value,user: req.user._id}).then(book => {
-			if (book) {
-				return Promise.reject("Book already exist with this ISBN no.");
-			}
-		});
-	}),*/
+  body("isbn", "ISBN must not be empty").isLength({ min: 1 }).trim().custom((value,{req}) => {
+    return Book.findOne({isbn : value,user: req.user._id}).then(book => {
+      if (book) {
+        return Promise.reject("Book already exist with this ISBN no.");
+      }
+    });
+  }),*/
   sanitizeBody("*").escape(),
   (req, res) => {
     try {

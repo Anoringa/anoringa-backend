@@ -21,6 +21,8 @@ var PostSchema = new Schema(
       ref: "User",
       required: true,
     },
+    categories: [{ type : Schema.ObjectId, ref: 'Categories', required: false}],
+    enabled: { type: Boolean, required: true, default: true },
   },
   { timestamps: true }
 );
