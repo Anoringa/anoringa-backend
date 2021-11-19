@@ -4,6 +4,7 @@ const PostController = require("../controllers/PostController");
 var router = express.Router();
 
 router.get("/", PostController.postList);
+router.get("/new", PostController.postListNew);
 router.get("/:id", PostController.postDetail);
 router.post("/", PostController.postStore);
 //router.put("/:id", PostController.bookUpdate);

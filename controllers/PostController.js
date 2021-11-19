@@ -108,6 +108,140 @@ exports.bookList = [
   },
 ];
 
+exports.postListNew = [
+  (req, res) => {
+    try {
+
+      Post.aggregate([
+        {
+          '$lookup': {
+            'from': 'users', 
+            'localField': 'user', 
+            'foreignField': '_id', 
+            'as': 'user'
+          }
+        }, {
+          '$lookup': {
+            'from': 'comments', 
+            'localField': '_id', 
+            'foreignField': 'post', 
+            'as': 'comments'
+          }
+        }, {
+          '$addFields': {
+            'countOfComments': {
+              '$cond': {
+                'if': {
+                  '$isArray': '$comments'
+                }, 
+                'then': {
+                  '$size': '$comments'
+                }, 
+                'else': 'NA'
+              }
+            }, 
+            'lastComment': {
+              '$cond': [
+                {
+                  '$eq': [
+                    '$comments', []
+                  ]
+                }, {
+                  '$const': new Date('Mon, 30 Nov 2020 00:00:00 GMT')
+                }, {
+                  '$arrayElemAt': [
+                    {
+                      '$slice': [
+                        '$comments.createdAt', -1
+                      ]
+                    }, 0
+                  ]
+                }
+              ]
+            }, 
+            'owner': {
+              '_id': {
+                '$cond': [
+                  {
+                    '$eq': [
+                      '$user', []
+                    ]
+                  }, {
+                    '$const': 'deleted'
+                  }, {
+                    '$arrayElemAt': [
+                      {
+                        '$slice': [
+                          '$user._id', -1
+                        ]
+                      }, 0
+                    ]
+                  }
+                ]
+              }, 
+              'username': {
+                '$cond': [
+                  {
+                    '$eq': [
+                      '$user', []
+                    ]
+                  }, {
+                    '$const': 'deleted'
+                  }, {
+                    '$arrayElemAt': [
+                      {
+                        '$slice': [
+                          '$user.username', -1
+                        ]
+                      }, 0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }, {
+          '$project': {
+            '_id': 1, 
+            'title': 1, 
+            'description': 1, 
+            'photo': 1, 
+            'music': 1, 
+            'createdAt': 1, 
+            'updatedAt': 1, 
+            'countOfComments': 1, 
+            'lastComment': 1, 
+            'categories': 1, 
+            'owner': 1, 
+            'enabled': 1
+          }
+        }, {
+          '$sort': {
+            'createdAt': -1
+          }
+        }
+      ]).then((post) => {
+        if (post.length > 0) {
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            post
+          );
+        } else {
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            []
+          );
+        }
+      });
+    } catch (err) {
+      //throw error in json response with status 500.
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+
 
 exports.postList = [
   (req, res) => {
@@ -272,6 +406,9 @@ exports.postList = [
     }
   },
 ];
+
+
+
 exports.postListOld = [
   (req, res) => {
     try {
