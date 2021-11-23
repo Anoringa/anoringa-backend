@@ -430,7 +430,7 @@ exports.modify = [
     .isLength({ min: 1 })
     .trim()
     .withMessage("Username must be specified.")
-    .isAlpha('es-ES', {ignore: ' '})
+    .isAlphanumeric('es-ES', {ignore: ' '})
     .withMessage("Username has non-alphanumeric characters."),
 
   body("password")
@@ -443,8 +443,9 @@ exports.modify = [
   body("data")
     .isLength({ min: 1 })
     .trim()
-    .isAlpha('es-ES', {ignore: ' '})
-    .withMessage("Data to change name must be specified."),
+    .isAlphanumeric('es-ES', {ignore: ' '})
+    .withMessage("New Username needs to change name must be specified.")
+    .withMessage("has non-alphanumeric characters."),
   // Sanitize fields.
   // Process request after validation and sanitization.
 
