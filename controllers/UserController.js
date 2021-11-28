@@ -427,25 +427,42 @@ exports.login = [
  */
 exports.modify = [
   body("username")
-    .isLength({ min: 1 })
-    .trim()
-    .withMessage("Username must be specified.")
-    .isAlphanumeric('es-ES', {ignore: ' '})
-    .withMessage("Username has non-alphanumeric characters."),
+    .isLength({ min: 1 }).withMessage("Username must be specified.")
+    .trim().withMessage("trim error.")
+    /*
+    .isAlphanumeric('es-ES', {ignore: ' '}).withMessage("has non-alphanumeric characters.")
+    */
+    .matches(/^[¡!¿?@çÇ.,a-zA-Z\d\-_\s]{2,32}$/, 'g').withMessage('contains invalid characters, upper/lower case letters, numbers, and underscores only'),
+
 
   body("password")
-    .isLength({ min: 1 })
-    .trim()
+    .isLength({ min: 1 }).withMessage("A password must be specified.")
+    .trim().withMessage("trim error.")
     .withMessage("Password must be specified."),
 
 
   // Validate fields.
   body("data")
-    .isLength({ min: 1 })
-    .trim()
-    .isAlphanumeric('es-ES', {ignore: ' '})
-    .withMessage("New Username needs to change name must be specified.")
-    .withMessage("has non-alphanumeric characters."),
+    .isLength({ min: 1 }).withMessage("New Username needs to change name must be specified.")
+    .trim().withMessage("trim error.")
+    /*
+    .isAlphanumeric('es-ES', {ignore: ' '}).withMessage("has non-alphanumeric characters.")
+    */
+    .matches(/^[¡!¿?@çÇ.,a-zA-Z\d\-_\s]{2,32}$/, 'g').withMessage('contains invalid characters, upper/lower case letters, numbers, and underscores only')
+    .custom((value, {req}) => {
+      return new Promise((resolve, reject) => {
+        UserModel.findOne({username: req.body.data}, function(err, user){
+          if(err) {
+            reject(new Error('Server Error'))
+          }
+          if(Boolean(user)) {
+            reject(new Error('Username is already in use'))
+          }
+          resolve(true)
+        });
+      });
+    }),
+    
   // Sanitize fields.
   // Process request after validation and sanitization.
 

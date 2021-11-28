@@ -1,0 +1,10 @@
+UserModel.findOne({ username: posibleUsername }).then(user => {
+if (!user) {
+    console.log("te la rifaste, this username is available")
+    return true 
+}
+else {
+    console.log("this username is already in use")
+    return false 
+}
+});

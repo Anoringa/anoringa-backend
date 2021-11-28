@@ -64,3 +64,4 @@ typings/
 .vscode/
 .env
 *.env
+*.example
