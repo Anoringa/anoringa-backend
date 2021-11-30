@@ -301,20 +301,22 @@ exports.register = [
 ];
 
 /**
- * User login.
+ * User loginOld.
  *
  * @param {string}      username
  * @param {string}      password
  *
  * @returns {Object}
  */
-exports.login = [
+exports.loginOld = [
   body("username")
-    .isLength({ min: 1 })
-    .trim()
-    .withMessage("Username must be specified.")
-    .isAlphanumeric()
-    .withMessage("Username has non-alphanumeric characters."),
+    .isLength({ min: 1 }).withMessage("Username must be specified.")
+    .trim().withMessage("trim error.")
+    /*
+    .isAlphanumeric('es-ES', {ignore: ' '}).withMessage("has non-alphanumeric characters.")
+    */
+    .matches(/^[¡!¿?@çÇ.,a-zA-Z\d\-_\s]{2,32}$/, 'g').withMessage('contains invalid characters, upper/lower case letters, numbers, and underscores only'),
+
 
   body("password")
     .isLength({ min: 1 })
@@ -333,8 +335,89 @@ exports.login = [
           errors.array()
         );
       } else {
+        console.log("req.body", req.body)
         UserModel.findOne({ username: req.body.username }).then((user) => {
+          console.log("user" + user)
           if (user) {
+
+            return new Promise((resolve, reject) => {
+              UserModel.findOne({ username: req.body.data }, function (err, user) {
+                if (err) {
+                  reject(new Error('Server Error'))
+                }
+                if (Boolean(user)) {
+                  reject(new Error('Username is already in use'))
+                }
+                resolve(true)
+              });
+            });
+
+
+
+            bcrypt.compare(req.body.password, user.password, function (err, res) {
+              if (err) {
+                // handle error
+                console.log("error 🥸")
+                return apiResponse.unauthorizedResponse({ success: false, message: 'error' });
+
+              }
+              if (res) {
+                // Send JWT
+                console.log("yes 🥸")
+                return apiResponse.successResponseWithData(
+                  res,
+                  "Login Success.",
+                  user
+                );
+              } else {
+                console.log("ni idea 🥸")
+                reject(new Error('Username is already in use'))
+
+                // response is OutgoingMessage object that server response http request
+                //return apiResponse.unauthorizedResponse({ success: false, message: 'passwords do not match' });
+              }
+              resolve(true)
+            });
+            /*
+            bcrypt.compare(
+              req.body.password,
+              user.password,
+              function (err, same) {
+
+                if (same) {
+
+                  let userData = {
+                    _id: user._id,
+                    username: user.username,
+                    password: user.password,
+                  };
+                  //Prepare JWT token for authentication
+                  const jwtPayload = userData;
+                  const jwtData = {
+                    expiresIn: process.env.JWT_TIMEOUT_DURATION,
+                  };
+                  const secret = process.env.JWT_SECRET;
+                  //Generated JWT token with Payload and secret.
+                  userData.token = jwt.sign(jwtPayload, secret, jwtData);
+                  return apiResponse.successResponseWithData(
+                    res,
+                    "Login Success.",
+                    userData
+                  );
+
+
+                } else {
+                  return apiResponse.unauthorizedResponse(
+                    res,
+                    "Username or Password wrong."
+                  );
+                }
+              }
+            );
+            */
+
+            //console.log("loaded password: ",req.body.password,"saved password: ",user.password)
+            //return apiResponse.successResponseWithData(res,"Login Success.",user);
             //Compare given password with db's hash.
             //console.log('user');
 
@@ -345,18 +428,18 @@ exports.login = [
             //console.log('saved password');
 
             //console.log(user.password);
-
+            /*
             bcrypt.compare(
               req.body.password,
               user.password,
               function (err, same) {
                 //console.log('check password');
-
+    
                 //console.log(err);
                 //console.log(same);
                 if (same) {
                   //console.log('user.isConfirmed');
-
+    
                   //console.log(user.isConfirmed);
                   //Check account confirmation.
                   if (user.isConfirmed) {
@@ -399,7 +482,7 @@ exports.login = [
                   );
                 }
               }
-            );
+            );*/
           } else {
             return apiResponse.unauthorizedResponse(
               res,
@@ -415,6 +498,89 @@ exports.login = [
 ];
 
 
+/**
+ * User login.
+ *
+ * @param {string}      email
+ * @param {string}      password
+ *
+ * @returns {Object}
+ */
+exports.login = [
+  body("username")
+    .isLength({ min: 1 }).withMessage("Username must be specified.")
+    .trim().withMessage("trim error.")
+    .matches(/^[¡!¿?@çÇ.,a-zA-Z\d\-_\s]{2,32}$/, 'g').withMessage('contains invalid characters, upper/lower case letters, numbers, and underscores only'),
+
+  body("id").isMongoId().withMessage("User ID must be specified."),
+  body("password").isLength({ min: 1 }).trim().withMessage("Password must be specified."),
+  sanitizeBody("username").escape(),
+  sanitizeBody("password").escape(),
+  (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return apiResponse.validationErrorWithData(res, "Validation Error.", errors.array());
+      } else {
+        UserModel.findOne({ username: req.body.username }).then(user => {
+          if (user) {
+            //Compare given password with db's hash.
+
+
+            if (user.password == req.body.password) {
+              console.log("correct password")
+            }
+            else {
+              console.log("non correct password")
+
+            }
+
+
+            /** Encrypt password */
+            bcrypt.hash(req.body.password,10, (err, res) => {
+              console.log('hash', res)
+              hash = res
+              compare(hash)
+            });
+
+            /** Compare stored password with new encrypted password */
+            function compare(encrypted) {
+              bcrypt.compare(user.password, encrypted, (err, resx) => {
+                // res == true or res == false
+                console.log('Compared result', resx, hash)
+
+                if(resx){
+                  let userData = {
+                    _id: user._id,
+                    username: req.body.data,
+                    password: user.password,
+                  };
+                  //Prepare JWT token for authentication
+                  const jwtPayload = userData;
+                  const jwtData = {
+                    expiresIn: process.env.JWT_TIMEOUT_DURATION,
+                  };
+                  const secret = process.env.JWT_SECRET;
+                  //Generated JWT token with Payload and secret.
+                  userData.token = jwt.sign(jwtPayload, secret, jwtData);
+                  return apiResponse.successResponseWithData(res, "Login Success.", userData);
+                }
+                else{
+                  return apiResponse.unauthorizedResponse(res, "The Password doesnt match with any account or wrong username");
+                }
+              })
+            }
+
+
+          } else {
+            return apiResponse.unauthorizedResponse(res, "Account doenst exist. Please contact admin.");
+          }
+        });
+      }
+    } catch (err) {
+      return apiResponse.ErrorResponse(res, err);
+    }
+  }];
 
 /**
  * User Modify USERNAME.
@@ -449,20 +615,20 @@ exports.modify = [
     .isAlphanumeric('es-ES', {ignore: ' '}).withMessage("has non-alphanumeric characters.")
     */
     .matches(/^[¡!¿?@çÇ.,a-zA-Z\d\-_\s]{2,32}$/, 'g').withMessage('contains invalid characters, upper/lower case letters, numbers, and underscores only')
-    .custom((value, {req}) => {
+    .custom((value, { req }) => {
       return new Promise((resolve, reject) => {
-        UserModel.findOne({username: req.body.data}, function(err, user){
-          if(err) {
+        UserModel.findOne({ username: req.body.data }, function (err, user) {
+          if (err) {
             reject(new Error('Server Error'))
           }
-          if(Boolean(user)) {
+          if (Boolean(user)) {
             reject(new Error('Username is already in use'))
           }
           resolve(true)
         });
       });
     }),
-    
+
   // Sanitize fields.
   // Process request after validation and sanitization.
 
@@ -505,7 +671,7 @@ exports.modify = [
                 //return Promise.reject("Post already exist with this title");
 
                 //var userData = user.toObject();
-                
+
 
 
                 //upsertData.username = req.body.data | user.username
@@ -542,7 +708,7 @@ exports.modify = [
                     );
                   });
                 }
-                else{
+                else {
                   console.log("no new username inserted");
 
                   return apiResponse.unauthorizedResponse(
@@ -552,7 +718,7 @@ exports.modify = [
                 }
 
 
-                
+
                 /*
                 var user = new UserModel({
                   username: data.username,
