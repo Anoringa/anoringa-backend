@@ -541,11 +541,7 @@ exports.loginOld = [
  * @returns {Object}
  */
 exports.login = [
-  body("username")
-    .isLength({ min: 1 }).withMessage("Username must be specified.")
-    .trim().withMessage("trim error.")
-    .matches(/^[¡!¿?@çÇ.,a-zA-Z\d\-_\s]{2,32}$/, 'g').withMessage('contains invalid characters, upper/lower case letters, numbers, and underscores only'),
-
+  body("username").isLength({ min: 1 }).withMessage("Username must be specified.").trim().withMessage("trim error.").matches(/^[¡!¿?@çÇ.,a-zA-Z\d\-_\s]{2,32}$/, 'g').withMessage('contains invalid characters, upper/lower case letters, numbers, and underscores only'),
   body("id").isMongoId().withMessage("User ID must be specified."),
   body("password").isLength({ min: 1 }).trim().withMessage("Password must be specified."),
   sanitizeBody("username").escape(),
@@ -586,7 +582,7 @@ exports.login = [
                 if (resx) {
                   let userData = {
                     _id: user._id,
-                    username: req.body.data,
+                    username: user.username,
                     password: user.password,
                   };
                   //Prepare JWT token for authentication
