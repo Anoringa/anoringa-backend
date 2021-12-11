@@ -110,6 +110,16 @@ function generatePassword() {
   return retVal;
 }
 
+
+function generateRandomUsername() {
+
+  var random_number = utility.randomNumber(4);
+  var usernameVal = "raul" + random_number
+  return usernameVal;
+}
+
+
+
 /**
  * User registration.
  *
@@ -129,7 +139,7 @@ exports.register = [
   // Sanitize fields.
   sanitizeBody("token").escape(),
   // Process request after validation and sanitization.
-  (req, res) => {
+  async (req, res) => {
     try {
       // Extract the validation errors from a request.
       const errors = validationResult(req);
@@ -166,14 +176,13 @@ exports.register = [
               response: token_received,
             })
           )
-          .then(function (response) {
+          .then(async function (response) {
             console.log(JSON.stringify(response.data));
             try {
               if (response.data.success == true) {
                 console.log("user registered correctly");
-                bcrypt.hash(generatePassword(), 10, function (err, hash) {
+                bcrypt.hash(generatePassword(), 10, async function (err, hash) {
                   // generate OTP for confirmation
-                  let username_random = utility.randomNumber(4);
                   // Create User object with escaped and trimmed data
 
                   var ip =
@@ -189,8 +198,33 @@ exports.register = [
                   //console.log(req.connection.remoteAddress);
                   //console.log(req.ip);
 
+                  var posibleUsername = generateRandomUsername()
+                  var posibleNewUsernameIsUnique = false
+                  
+                  while (posibleNewUsernameIsUnique != true) {
+                    // check if the username is unique
+                    console.log("posibleUsername: ",posibleUsername)
+
+                    await UserModel.findOne({ username: posibleUsername }).then((user) => {
+                      if (user) {
+                        // if not,  generate a new one
+                        console.log("user" + user)
+                        console.log("esta en uso")
+                        posibleUsername = generateRandomUsername()
+                      }
+                      else {
+                        console.log("esta libre")
+                        //if true, continue
+                        posibleNewUsernameIsUnique = true
+                      }
+                    });
+                  }
+
+                  // Proposal 1: Incremental
+
+
                   var user = new UserModel({
-                    username: "raul" + username_random,
+                    username: posibleUsername,
                     //ipaddress: "127.0.0.1",
                     ipaddress: ip,
                     password: hash,
@@ -537,7 +571,7 @@ exports.login = [
 
 
             /** Encrypt password */
-            bcrypt.hash(req.body.password,10, (err, res) => {
+            bcrypt.hash(req.body.password, 10, (err, res) => {
               console.log('hash', res)
               hash = res
               compare(hash)
@@ -549,7 +583,7 @@ exports.login = [
                 // res == true or res == false
                 console.log('Compared result', resx, hash)
 
-                if(resx){
+                if (resx) {
                   let userData = {
                     _id: user._id,
                     username: req.body.data,
@@ -565,7 +599,7 @@ exports.login = [
                   userData.token = jwt.sign(jwtPayload, secret, jwtData);
                   return apiResponse.successResponseWithData(res, "Login Success.", userData);
                 }
-                else{
+                else {
                   return apiResponse.unauthorizedResponse(res, "The Password doesnt match with any account or wrong username");
                 }
               })
@@ -656,12 +690,14 @@ exports.modify = [
             if (user) {
               console.log("User exist with this username");
               console.log(user);
-              console.log("password");
+              console.log("password in request");
               console.log(req.body.password);
 
-              let password_str = he.decode(req.body.password);
-              console.log("password2");
-              console.log(password_str);
+              //let password_str = he.decode(req.body.password);
+              let password_str = req.body.password;
+              console.log("password saved");
+              console.log(user.password);
+              console.log("compare: ", (user.password == password_str));
 
 
 

@@ -39,3 +39,9 @@ npm -v
 npm cache clean --force
 rm  node_modules
 ```
+
+
+run the demo
+```Powershell
+npm run nodemonserve
+```
