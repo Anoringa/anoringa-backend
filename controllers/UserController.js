@@ -137,7 +137,7 @@ exports.register = [
     .trim()
     .withMessage("Token name must be specified."),
   // Sanitize fields.
-  sanitizeBody("token").escape(),
+  sanitizeBody("token"),
   // Process request after validation and sanitization.
   async (req, res) => {
     try {
@@ -356,8 +356,8 @@ exports.loginOld = [
     .isLength({ min: 1 })
     .trim()
     .withMessage("Password must be specified."),
-  sanitizeBody("username").escape(),
-  sanitizeBody("password").escape(),
+  sanitizeBody("username"),
+  sanitizeBody("password"),
 
   (req, res) => {
     try {
@@ -544,8 +544,8 @@ exports.login = [
   body("username").isLength({ min: 1 }).withMessage("Username must be specified.").trim().withMessage("trim error.").matches(/^[¡!¿?@çÇ.,a-zA-Z\d\-_\s]{2,32}$/, 'g').withMessage('contains invalid characters, upper/lower case letters, numbers, and underscores only'),
   body("id").isMongoId().withMessage("User ID must be specified."),
   body("password").isLength({ min: 1 }).trim().withMessage("Password must be specified."),
-  sanitizeBody("username").escape(),
-  sanitizeBody("password").escape(),
+  sanitizeBody("username"),
+  sanitizeBody("password"),
   (req, res) => {
     try {
       const errors = validationResult(req);
@@ -568,16 +568,23 @@ exports.login = [
 
             /** Encrypt password */
             bcrypt.hash(req.body.password, 10, (err, res) => {
-              console.log('hash', res)
-              hash = res
-              compare(hash)
+              //console.log('hash', res)
+              //hash = res
+              compare(res)
             });
 
             /** Compare stored password with new encrypted password */
             function compare(encrypted) {
               bcrypt.compare(user.password, encrypted, (err, resx) => {
                 // res == true or res == false
-                console.log('Compared result', resx, hash)
+                console.log('Compared result', resx, encrypted)
+
+                // article https://stackoverflow.com/questions/62357984/disable-hex-code-converting-forward-slash-to-x2f-using-node-js-mongoose
+                // remove .escape() in express validators
+                //console.log('user   : ', req.body.username)
+                //console.log('pass   : ', req.body.password)
+                //console.log('passenc: ', encrypted)
+                //console.log('in db  : ', user.password)
 
                 if (resx) {
                   let userData = {
@@ -663,9 +670,9 @@ exports.modify = [
   // Process request after validation and sanitization.
 
 
-  sanitizeBody("username").escape(),
-  sanitizeBody("password").escape(),
-  sanitizeBody("data").escape(),
+  sanitizeBody("username"),
+  sanitizeBody("password"),
+  sanitizeBody("data"),
 
   (req, res) => {
     try {
@@ -837,8 +844,8 @@ exports.verifyConfirm = [
     .isEmail()
     .withMessage("Email must be a valid email address."),
   body("otp").isLength({ min: 1 }).trim().withMessage("OTP must be specified."),
-  sanitizeBody("email").escape(),
-  sanitizeBody("otp").escape(),
+  sanitizeBody("email"),
+  sanitizeBody("otp"),
   (req, res) => {
     try {
       const errors = validationResult(req);
@@ -907,7 +914,7 @@ exports.resendConfirmOtp = [
     .withMessage("Email must be specified.")
     .isEmail()
     .withMessage("Email must be a valid email address."),
-  sanitizeBody("email").escape(),
+  sanitizeBody("email"),
   (req, res) => {
     try {
       const errors = validationResult(req);
