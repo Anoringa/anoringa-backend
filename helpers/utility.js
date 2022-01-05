@@ -7,3 +7,11 @@ exports.randomNumber = function (length) {
 	}
 	return Number(text);
 };
+
+exports.stringIsNotNullOrEmpty = function (string) {
+	//return !(string && string != "" && string != undefined && string != null)
+
+	return !(typeof string === 'string' || string instanceof String)
+
+}
+

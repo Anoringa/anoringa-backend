@@ -11,6 +11,10 @@ var cors = require("cors");
 var postPhoto = require("./helpers/postPhotoHelper");
 
 
+
+var notificationsHelper = require("./helpers/notificationsHelper");
+
+
 var axios = require("axios");
 var FormData = require('form-data');
 
@@ -50,6 +54,22 @@ async function imgurUP(base64image) {
       return false;
     });
 }
+
+function cleanHTMLTags(stringer) {
+  var stringCleanedFromTags = stringer.replace(/<\/?[^>]+(>|$)/g, "");
+  return stringCleanedFromTags
+}
+function ShortenItUp(stringer, amountOfCharacters) {
+  var strFirstNChars = stringer.substring(0, amountOfCharacters);
+  return strFirstNChars
+}
+function notifyAll(postInfo, url) {
+  console.log(postInfo)
+  console.log(url)
+
+  notificationsHelper.notifyNewPost(postInfo.title, ShortenItUp(cleanHTMLTags(postInfo.description), 25), url)
+}
+
 
 // Server configuration
 var SERVER_ADDRESS = process.env.SERVER_ADDRESS;
@@ -187,59 +207,59 @@ io.on("connection", function (socket) {
     */
 
     Post.findOne({ _id: data.postid })
-    .then((post) => {
-      if (post) {
-        console.log("Post exist");
-        //return Promise.reject("Post already exist with this title");
+      .then((post) => {
+        if (post) {
+          console.log("Post exist");
+          //return Promise.reject("Post already exist with this title");
 
-        console.log(post);
-        User.findOne({ username: data.username })
-        .then((user) => {
-          if (user) {
-            console.log("User exist with this username");
-            console.log(user);
-            console.log("password");
-            console.log(data.password);
-            if (user.password == data.password) {
-              console.log("User password OK");
-              //return Promise.reject("Post already exist with this title");
+          console.log(post);
+          User.findOne({ username: data.username })
+            .then((user) => {
+              if (user) {
+                console.log("User exist with this username");
+                console.log(user);
+                console.log("password");
+                console.log(data.password);
+                if (user.password == data.password) {
+                  console.log("User password OK");
+                  //return Promise.reject("Post already exist with this title");
 
-              console.log("comment settings");
-              console.log(user._id);
-              console.log(post._id);
-              console.log(data.text);
+                  console.log("comment settings");
+                  console.log(user._id);
+                  console.log(post._id);
+                  console.log(data.text);
 
-              var commentData = Comment({
-                _id: data._id,
-                user: user._id,
-                username: user.username,
-                post: post._id,
-                text: data.text,
-                inResponseTo: data.inResponseTo,
-              });
+                  var commentData = Comment({
+                    _id: data._id,
+                    user: user._id,
+                    username: user.username,
+                    post: post._id,
+                    text: data.text,
+                    inResponseTo: data.inResponseTo,
+                  });
 
-              commentData.save();
-              console.log("\n>> Comment Created:\n", commentData);
-              socket.broadcast.emit("comment", commentData);
-              return callback(commentData);
+                  commentData.save();
+                  console.log("\n>> Comment Created:\n", commentData);
+                  socket.broadcast.emit("comment", commentData);
+                  return callback(commentData);
 
-              //return postData;
-            } else {
-              console.log("User password wrong");
-            }
-          } else {
-            console.log("User dont exist");
+                  //return postData;
+                } else {
+                  console.log("User password wrong");
+                }
+              } else {
+                console.log("User dont exist");
 
-            //var user = User.findOne({ username: data.username });
-            //console.log(user);
-          }
-        })
-        .catch((err) => { console.log('audienceService', err);})
-      } else {
-        console.log("Post dont exist");
-      }
-    })
-    .catch((err) => { console.log('audienceService', err);})
+                //var user = User.findOne({ username: data.username });
+                //console.log(user);
+              }
+            })
+            .catch((err) => { console.log('audienceService', err); })
+        } else {
+          console.log("Post dont exist");
+        }
+      })
+      .catch((err) => { console.log('audienceService', err); })
     /*
     var userer = db.User.find({ username: data.username });
     console.log(userer);
@@ -267,123 +287,140 @@ io.on("connection", function (socket) {
     */
 
     Post.findOne({ title: data.title })
-    .then((post) => {
-      if (post) {
-        console.log("Post already exist with this title");
-        return Promise.reject("Post already exist with this title");
-      } else {
-        console.log("Post Create");
-        //console.log(post);
-        //User.findOne({ username: data.username }).then((user) => {
-        User.findOne({ _id: data._id }).then((user) => {
-          if (user) {
-            console.log("User exist with this username");
-            console.log(user);
-            console.log("password");
-            console.log(data.password);
-            if (user.password == data.password) {
-              console.log("User password OK");
-              //return Promise.reject("Post already exist with this title");
+      .then((post) => {
+        if (post) {
+          console.log("Post already exist with this title");
+          return Promise.reject("Post already exist with this title");
+        } else {
+          console.log("Post Create");
+          //console.log(post);
+          //User.findOne({ username: data.username }).then((user) => {
+          User.findOne({ _id: data._id }).then((user) => {
+            if (user) {
+              console.log("User exist with this username");
+              console.log(user);
+              console.log("password");
+              console.log(data.password);
+              if (user.password == data.password) {
+                console.log("User password OK");
+                //return Promise.reject("Post already exist with this title");
 
-              console.log("post settings");
+                console.log("post settings");
 
-              console.log(data.title);
-              console.log(data.description);
-              console.log(data.photo);
-              if (
-                data.title != "" && data.title != undefined && data.title != null &&
-                data.description != "" && data.description != undefined && data.description != null 
-                // && data.photo.content != "" && data.photo.content != undefined && data.photo.content != null
-              ) {
+                console.log(data.title);
+                console.log(data.description);
+                console.log(data.photo);
+                if (
+                  data.title != "" && data.title != undefined && data.title != null &&
+                  data.description != "" && data.description != undefined && data.description != null
+                  // && data.photo.content != "" && data.photo.content != undefined && data.photo.content != null
+                ) {
 
-                //postPhoto.upload().then()
-                console.log("before");
-                postPhoto.upload(data.photo)
-                  .then(function (v) {
-                    // `delay` returns a promise
-                    console.log(v + " gg photo"); // Log the value once it is resolved
-                    
+                  //postPhoto.upload().then()
+                  console.log("before");
+                  postPhoto.upload(data.photo)
+                    .then(function (v) {
+                      // `delay` returns a promise
+                      console.log(v + " gg photo"); // Log the value once it is resolved
 
 
-                    var muzica = data.music || false
-                    if (v != "error") {
-                      var postData = new Post({
-                        title: data.title,
-                        description: data.description,
-                        photo: v,
-                        music: muzica,
-                        user: user._id,
-                      });
-  
-                      postData.save();
-  
-                      console.log("\n>> Post Created:\n", postData);
-                      socket.broadcast.emit("post", postData);
-                      return callback(postData);
-                      //return postData;
-                      
-                    } else {
-                      console.log(v + " no casi gg"); // Log the value once it is resolved
+
+                      var muzica = data.music || false
+                      if (v != "error") {
+                        var postData = new Post({
+                          title: data.title,
+                          description: data.description,
+                          photo: v,
+                          music: muzica,
+                          user: user._id,
+                        });
+
+                        postData.save().then((postit) => {
+                          console.log(postit._id)
+
+
+                          var FRONTEND_URL = process.env.FRONTEND_URL;
+                          notifyAll(postData, FRONTEND_URL + "/post/" + postit._id)
+                        });
+
+
+
+
+
+
+                        // https://stackoverflow.com/questions/6854431/how-do-i-get-the-objectid-after-i-save-an-object-in-mongoose
+
+
+
+                        console.log("\n>> Post Created:\n", postData);
+                        socket.broadcast.emit("post", postData);
+
+
+                        return callback(postData);
+                        //return postData;
+
+                      } else {
+                        console.log(v + " no casi gg"); // Log the value once it is resolved
+                        console.log("some error with the upload");
+
+                      }
+                    })
+                    .catch(function (v) {
+                      // Or do something else if it is rejected
+                      console.log(v + " nogg"); // Log the value once it is resolved
                       console.log("some error with the upload");
-                      
-                    }
-                  })
-                  .catch(function (v) {
-                    // Or do something else if it is rejected
-                    console.log(v + " nogg"); // Log the value once it is resolved
-                    console.log("some error with the upload");
-                    // (it would not happen in this example, since `reject` is not called).
+                      // (it would not happen in this example, since `reject` is not called).
+                    });
+                  console.log("after");
+
+
+
+                  /*
+                if (data.photo.value.type == "photo" || data.photo.value.source == "upload") {
+                  await imgurUP(data.photo.content).then(function (battery) {
+                    console.log("battery");
+                    console.log(battery);
+                    data.photo.content = battery;
                   });
-                console.log("after");
-
-
-
-                /*
-              if (data.photo.value.type == "photo" || data.photo.value.source == "upload") {
-                await imgurUP(data.photo.content).then(function (battery) {
-                  console.log("battery");
-                  console.log(battery);
-                  data.photo.content = battery;
+                  //data.photo.content = varita;
+                }
+  
+                if (data.photo.content == "" || data.photo.content == null) {
+                  data.photo.value.type = "photo"
+                  data.photo.value.source = "URL"
+                  data.photo.content = "http://placekitten.com/300/300";
+                }
+                var postData = new Post({
+                  title: data.title,
+                  description: data.description,
+                  user: user._id,
+                  photo: data.photo.content,
                 });
-                //data.photo.content = varita;
-              }
-
-              if (data.photo.content == "" || data.photo.content == null) {
-                data.photo.value.type = "photo"
-                data.photo.value.source = "URL"
-                data.photo.content = "http://placekitten.com/300/300";
-              }
-              var postData = new Post({
-                title: data.title,
-                description: data.description,
-                user: user._id,
-                photo: data.photo.content,
-              });
-
-              postData.save();
-
-              console.log("\n>> Post Created:\n", postData);
-              socket.broadcast.emit("post", postData);
-              return callback(postData);
-              //return postData;
-              */
+  
+                postData.save();
+  
+                console.log("\n>> Post Created:\n", postData);
+                socket.broadcast.emit("post", postData);
+                return callback(postData);
+                //return postData;
+                */
+                } else {
+                  console.log("some data comes with an error");
+                }
               } else {
-                console.log("some data comes with an error");
+                console.log("User password wrong");
               }
             } else {
-              console.log("User password wrong");
-            }
-          } else {
-            console.log("User dont exist");
-            console.log(data);
+              console.log("User dont exist");
+              console.log(data);
 
-            //var user = User.findOne({ username: data.username });
-            //console.log(user);
-          }
-        });
-      }
-    })
-    .catch((err) => { console.log('audienceService', err);})
+              //var user = User.findOne({ username: data.username });
+              //console.log(user);
+            }
+          });
+        }
+      })
+      .catch((err) => { console.log('audienceService', err); })
   });
 });
 
