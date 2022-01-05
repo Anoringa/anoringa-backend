@@ -25,6 +25,9 @@ Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Unrestricted
 # install nodist using chocolatey
 choco install nodist
 
+# Reload ENV
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
 # setup node 14 and npm with nodist
 nodist + 14
 nodist global 14
