@@ -9,6 +9,7 @@ exports.randomNumber = function (length) {
 };
 
 exports.stringIsNotNullOrEmpty = function (string) {
+	// https://stackoverflow.com/questions/4059147/check-if-a-variable-is-a-string-in-javascript
 	//return !(string && string != "" && string != undefined && string != null)
 
 	return !(typeof string === 'string' || string instanceof String)

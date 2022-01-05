@@ -56,10 +56,13 @@ async function imgurUP(base64image) {
 }
 
 function cleanHTMLTags(stringer) {
+  // https://stackoverflow.com/questions/5002111/how-to-strip-html-tags-from-string-in-javascript
   var stringCleanedFromTags = stringer.replace(/<\/?[^>]+(>|$)/g, "");
   return stringCleanedFromTags
 }
 function ShortenItUp(stringer, amountOfCharacters) {
+  // https://stackoverflow.com/questions/39886730/javascript-how-to-get-first-three-characters-of-a-string/39886793
+  // https://playcode.io/new/
   var strFirstNChars = stringer.substring(0, amountOfCharacters);
   return strFirstNChars
 }
