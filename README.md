@@ -27,6 +27,7 @@ choco install nodist
 
 # Reload ENV
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+C:\ProgramData\chocolatey\bin\RefreshEnv.cmd
 
 # setup node 14 and npm with nodist
 nodist + 14
