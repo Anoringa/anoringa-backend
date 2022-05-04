@@ -2,19 +2,11 @@
 the rest api service of anoringa
 
 
-heroku logs --tail --app app_id
-
-based on:
-https://github.com/maitraysuthar/rest-api-nodejs-mongodb
-
-
-
-
-requeriments:
+### Requeriments:
 - node v14
     
     
-recommendations:
+### Recommendations:
 - use [nodist](https://chocolatey.org/install#individual) to manage node versions
   - requeriments [chocolatey](https://chocolatey.org/install#individual)
 
@@ -45,7 +37,13 @@ rm  node_modules
 ```
 
 
-run the demo
+### Run the demo
 ```Powershell
 npm run nodemonserve
 ```
+
+
+
+
+### Based on
+https://github.com/maitraysuthar/rest-api-nodejs-mongodb
