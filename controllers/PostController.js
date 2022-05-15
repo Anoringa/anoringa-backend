@@ -50,7 +50,7 @@ function uploadImageImgur(base64code) {
 
 function generateRandomUsername() {
   var random_number = utility.randomNumber(4);
-  var usernameVal = "ANON" + random_number;
+  var usernameVal = "Anonimo" + random_number;
   return usernameVal;
 }
 

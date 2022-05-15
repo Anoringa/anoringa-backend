@@ -1,5 +1,5 @@
 V 0.7 Anoringa
-    AnoUsers
+    Real Anon Users
         example
             POST 1
                 AUTHOR: carlos      ->   anoringuero21
@@ -11,5 +11,13 @@ V 0.7 Anoringa
                 COMMENT 2: carlos   ->   anoringuero32
 
     add dark mode switch more accessible if not leged in
+    fix dark mode Iniciar Sesión Button
     
+V 0.8 Anoringa
+    Categories
+    Random ANON Names
+    Disable automatic music when open a POST
+
     
+    OPTIONAL
+        posibility to choose if anon name

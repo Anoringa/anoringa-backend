@@ -65,3 +65,5 @@ typings/
 .env
 *.env
 *.example
+
+.response.*
