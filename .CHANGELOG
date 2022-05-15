@@ -1,0 +1,15 @@
+V 0.7 Anoringa
+    AnoUsers
+        example
+            POST 1
+                AUTHOR: carlos      ->   anoringuero21
+                COMMENT 1: juan     ->   anoringuero15
+                COMMENT 2: robert   ->   anoringuero07
+            POST 2
+                AUTHOR: juan        ->   anoringuero06
+                COMMENT 1: robert   ->   anoringuero03
+                COMMENT 2: carlos   ->   anoringuero32
+
+    add dark mode switch more accessible if not leged in
+    
+    

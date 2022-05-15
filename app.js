@@ -1,4 +1,5 @@
 var express = require("express");
+const compression = require('compression');
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
@@ -98,6 +99,12 @@ mongoose
 var db = mongoose.connection;
 
 var app = express();
+
+// https://medium.com/@victor.valencia.rico/gzip-compression-with-node-js-cc3ed74196f9
+// Compress all HTTP responses
+app.use(compression());
+
+
 
 // Configurar cabeceras y cors
 // '*',

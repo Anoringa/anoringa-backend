@@ -11,6 +11,7 @@ mongoose.set("useFindAndModify", false);
 
 var axios = require("axios");
 var request = require("request");
+const utility = require("../helpers/utility");
 
 var jwt_decode = require("jwt-decode");
 const PostModel = require("../models/PostModel");
@@ -47,6 +48,12 @@ function uploadImageImgur(base64code) {
   });
 }
 
+function generateRandomUsername() {
+  var random_number = utility.randomNumber(4);
+  var usernameVal = "ANON" + random_number;
+  return usernameVal;
+}
+
 // Comment Schema
 function CommentData(data) {
   this.id = data._id;
@@ -74,181 +81,11 @@ function PostData(data) {
   this.updatedAt = data.updatedAt;
 }
 
-/**
- * Book List.
- *
- * @returns {Object}
- */
-exports.bookList = [
-  auth,
-  function (req, res) {
-    try {
-      Post.find(
-        { user: req.user._id },
-        "_id title description isbn createdAt"
-      ).then((post) => {
-        if (post.length > 0) {
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            post
-          );
-        } else {
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            []
-          );
-        }
-      });
-    } catch (err) {
-      //throw error in json response with status 500.
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
-];
-
-exports.postListNew = [
-  (req, res) => {
-    try {
-
-      Post.aggregate([
-        {
-          '$lookup': {
-            'from': 'users', 
-            'localField': 'user', 
-            'foreignField': '_id', 
-            'as': 'user'
-          }
-        }, {
-          '$lookup': {
-            'from': 'comments', 
-            'localField': '_id', 
-            'foreignField': 'post', 
-            'as': 'comments'
-          }
-        }, {
-          '$addFields': {
-            'countOfComments': {
-              '$cond': {
-                'if': {
-                  '$isArray': '$comments'
-                }, 
-                'then': {
-                  '$size': '$comments'
-                }, 
-                'else': 'NA'
-              }
-            }, 
-            'lastComment': {
-              '$cond': [
-                {
-                  '$eq': [
-                    '$comments', []
-                  ]
-                }, {
-                  '$const': new Date('Mon, 30 Nov 2020 00:00:00 GMT')
-                }, {
-                  '$arrayElemAt': [
-                    {
-                      '$slice': [
-                        '$comments.createdAt', -1
-                      ]
-                    }, 0
-                  ]
-                }
-              ]
-            }, 
-            'owner': {
-              '_id': {
-                '$cond': [
-                  {
-                    '$eq': [
-                      '$user', []
-                    ]
-                  }, {
-                    '$const': 'deleted'
-                  }, {
-                    '$arrayElemAt': [
-                      {
-                        '$slice': [
-                          '$user._id', -1
-                        ]
-                      }, 0
-                    ]
-                  }
-                ]
-              }, 
-              'username': {
-                '$cond': [
-                  {
-                    '$eq': [
-                      '$user', []
-                    ]
-                  }, {
-                    '$const': 'deleted'
-                  }, {
-                    '$arrayElemAt': [
-                      {
-                        '$slice': [
-                          '$user.username', -1
-                        ]
-                      }, 0
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }, {
-          '$project': {
-            '_id': 1, 
-            'title': 1, 
-            'description': 1, 
-            'photo': 1, 
-            'music': 1, 
-            'createdAt': 1, 
-            'updatedAt': 1, 
-            'countOfComments': 1, 
-            'lastComment': 1, 
-            'categories': 1, 
-            'owner': 1, 
-            'enabled': 1
-          }
-        }, {
-          '$sort': {
-            'createdAt': -1
-          }
-        }
-      ]).then((post) => {
-        if (post.length > 0) {
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            post
-          );
-        } else {
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            []
-          );
-        }
-      });
-    } catch (err) {
-      //throw error in json response with status 500.
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
-];
-
 
 exports.postList = [
   (req, res) => {
     try {
-
       Post.aggregate([
-        /**/
         {
           $lookup: {
             from: "users",
@@ -260,100 +97,81 @@ exports.postList = [
         {
           $lookup: {
             from: "comments",
-            let: { postId: "$_id" },
-            pipeline: [
-              { $match: { $expr: { $eq: ["$post", "$$postId"] } } },
-              {
-                $lookup: {
-                  from: "users",
-                  let: { addressId: "$user" },
-                  pipeline: [
-                    { $match: { $expr: { $eq: ["$_id", "$$addressId"] } } },
-                  ],
-                  as: "address",
-                },
-              },
-            ],
-            as: "address",
-          },
-        },
-        /*
-        { "$lookup": {
-          "from": "comments",
-          "let": { "partyId": "$_id" },
-          "pipeline": [
-            { "$match": { "$expr": { "$eq": ["$party_id", "$$partyId"] }}},
-            { "$lookup": {
-              "from": "addressComment",
-              "let": { "addressId": "$_id" },
-              "pipeline": [
-                { "$match": { "$expr": { "$eq": ["$address_id", "$$addressId"] }}}
-              ],
-              "as": "address"
-            }}
-          ],
-          "as": "address"
-        }},
-        { "$unwind": "$address" },*/
-        {
-          $lookup: {
-            from: "comments",
             localField: "_id",
             foreignField: "post",
             as: "comments",
-            /*
-            pipeline: [
-              { $lookup: {
-                from: users,                                                         
-                let: { _id: mongoose.Types.ObjectId($user) },
-                as: address
-              }}
-            ],*/
-            /*
-            pipeline: [
-              { $match: { $expr: { $eq: [$user, $$_id] }}},
-              { $lookup: {
-                from: users,                                                         
-                let: { _id: $user },
-                as: address
-              }}
-            ],
-            */
-            /*
-            pipeline: [
-              { $match: { $user: mongoose.Types.ObjectId($$_id)}},
-              { $lookup: {
-                from: users,
-                let: { _id: $user },
-                as: address
-              }}
-            ],
-            */
           },
         },
         {
-          "$addFields": {
-            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $arrayElemAt: ["$comments.createdAt", -1] }, else: "NA" } },
-            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $arrayElemAt: [ { $slice: [ "$comments.createdAt", -1 ]}, 0 ] }, else: "NA" } },
-            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $arrayElemAt: ["$comments.createdAt", -1] }, else: "NA" } },
-            
-            lastComment: { $cond: {
-              if    : { $not: { $eq: [ { $size: "$comments" }, 0 ] } },
-              then  : { $slice: [ "$comments.createdAt",-1 ]} ,
-              //then  : { $arrayElemAt: [{ $slice: [ "$comments.createdAt",-1 ]}, 0] } ,
-              //then  : { $arrayElemAt: [ { $slice: [ "$comments.createdAt", -1 ]}, 0 ] },
-              //then  : { $slice: [ "$comments.createdAt", -1 ]},
-              //else  : false
-              else  : [ "2020-11-30T00:00:00.000Z"],
-              //else  : false
-            }},
-            //lastComment: { $cond: {if: { $eq: [ { $size: "$comments" }, 0 ] },then  : false,else  : true}},
-
-
-
-            numberOfColors: { $cond: { if: { $isArray: "$comments" }, then: { $size: "$comments" }, else: "NA" } },
-            countOfComments: { $cond: { if: { $isArray: "$comments" }, then: { $size: "$comments" }, else: "NA" } },
-          }
+          $addFields: {
+            countOfComments: {
+              $cond: {
+                if: {
+                  $isArray: "$comments",
+                },
+                then: {
+                  $size: "$comments",
+                },
+                else: "NA",
+              },
+            },
+            lastComment: {
+              $cond: [
+                {
+                  $eq: ["$comments", []],
+                },
+                {
+                  $const: new Date("Mon, 30 Nov 2020 00:00:00 GMT"),
+                },
+                {
+                  $arrayElemAt: [
+                    {
+                      $slice: ["$comments.createdAt", -1],
+                    },
+                    0,
+                  ],
+                },
+              ],
+            },
+            owner: {
+              _id: {
+                $cond: [
+                  {
+                    $eq: ["$user", []],
+                  },
+                  {
+                    $const: "deleted",
+                  },
+                  {
+                    $arrayElemAt: [
+                      {
+                        $slice: ["$user._id", -1],
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+              username: {
+                $cond: [
+                  {
+                    $eq: ["$user", []],
+                  },
+                  {
+                    $const: "deleted",
+                  },
+                  {
+                    $arrayElemAt: [
+                      {
+                        $slice: ["$user.username", -1],
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
         },
         {
           $project: {
@@ -361,183 +179,37 @@ exports.postList = [
             title: 1,
             description: 1,
             photo: 1,
+            music: 1,
             createdAt: 1,
-            updatedAt: 1,/*
-            comments: 1,
-            */
-            //numberOfColors: { $cond: { if: { $isArray: "$comments" }, then: { $size: "$comments" }, else: "NA" } },
-            numberOfColors: 1,
+            updatedAt: 1,
             countOfComments: 1,
-            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $slice: [ "$comments.createdAt", -1 ]}, else: "NA" } },
-            //lastComment: { $arrayElemAt: [ { $slice: [ "$comments.createdAt", -1 ]}, 0 ] },
-            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $arrayElemAt: [ { $slice: [ "$comments.createdAt", -1 ]}, 0 ] }, else: "NA" } },
-            //lastComment: { $cond: { if: { $isArray: "$comments" }, then: { $arrayElemAt: [ "$comments.createdAt", -1 ]}, else: "" } },
             lastComment: 1,
-            //"comments.post": 0,
-
-            "user.username": 1,
-            "user._id": 1,
+            categories: 1,
+            //owner: 1,
+            enabled: 1,
           },
         },
         {
           $sort: {
-            "recommendCount": -1
-          }
+            createdAt: -1,
+          },
         },
-
       ]).then((post) => {
         if (post.length > 0) {
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            post
-          );
-        } else {
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            []
-          );
-        }
-      });
-    } catch (err) {
-      //throw error in json response with status 500.
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
-];
-
-
-
-exports.postListOld = [
-  (req, res) => {
-    try {
-      Post.find(
-        {},
-        "_id title description photo user createdAt updatedAt"
-      ).then((post) => {
-        if (post.length > 0) {
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            post
-          );
-        } else {
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            []
-          );
-        }
-      });
-    } catch (err) {
-      //throw error in json response with status 500.
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
-];
-
-/**
- * Book Detail.
- *
- * @param {string}      id
- *
- * @returns {Object}
- */
-exports.bookDetail = [
-  auth,
-  function (req, res) {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return apiResponse.successResponseWithData(res, "Operation success", {});
-    }
-    try {
-      Book.findOne(
-        { _id: req.params.id, user: req.user._id },
-        "_id title description isbn createdAt"
-      ).then((book) => {
-        if (book !== null) {
-          let bookData = new BookData(book);
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            bookData
-          );
-        } else {
-          return apiResponse.successResponseWithData(
-            res,
-            "Operation success",
-            {}
-          );
-        }
-      });
-    } catch (err) {
-      //throw error in json response with status 500.
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
-];
-
-/**
- * Post Detail.
- *
- * @param {string}      id
- *
- * @returns {Object}
- */
-exports.postDetail2 = [
-  //body("id").isLength({ min: 1 }).trim().withMessage("Username must be specified.").isAlphanumeric().withMessage("Username has non-alphanumeric characters."),
-
-  body("id")
-    .isLength({ min: 1 })
-    .trim()
-    .withMessage("Post ID must be specified.")
-    .isAlphanumeric()
-    .withMessage("Post ID must be a valid identificator.")
-    .custom((value) => {
-      return PostModel.findOne({ _id: value }).then((post) => {
-        if (post) {
-          console.log("Post ID already exist");
-        } else {
-          console.log("Post ID not exist");
-        }
-      });
-    }),
-
-  sanitizeBody("id").escape(),
-
-  (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return apiResponse.successResponseWithData(res, "Operation success", {});
-    }
-    try {
-      Post.findOne(
-        { _id: req.params.id },
-        "_id title description photo user createdAt updatedAt"
-      ).then((post) => {
-        if (post !== null) {
-          let postData = new PostData(post);
-
-          Comment.find(
-            { post: req.params.id },
-            "_id user username text inResponseTo createdAt updatedAt"
-          ).then((comments) => {
-            console.log("comments");
-            console.log(comments);
-            if (comments !== null) {
-              //let commentData = new CommentData(comments);
-              postData.comments = comments;
-              return apiResponse.successResponseWithData(
-                res,
-                "Operation success",
-                postData
-              );
-            }
+          var task_names = post.map(function (task, index, array) {
+            return task.owner;
           });
+          //console.log("task_names: ", task_names);
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            post
+          );
         } else {
           return apiResponse.successResponseWithData(
             res,
             "Operation success",
-            {}
+            []
           );
         }
       });
@@ -547,6 +219,7 @@ exports.postDetail2 = [
     }
   },
 ];
+
 
 var pipeline = [
   {
@@ -590,7 +263,7 @@ exports.postDetail = [
     .custom((value) => {
       return PostModel.findOne({ _id: value }).then((post) => {
         if (post) {
-          console.log("Post ID already exist");
+          console.log("Post ID exist");
         } else {
           console.log("Post ID not exist");
         }
@@ -609,7 +282,7 @@ exports.postDetail = [
         {
           $match: { _id: mongoose.Types.ObjectId(req.params.id) },
         },
-        /**/
+		
         {
           $lookup: {
             from: "users",
@@ -618,6 +291,9 @@ exports.postDetail = [
             as: "user",
           },
         },
+        /*
+		*/
+        /*
         {
           $lookup: {
             from: "comments",
@@ -637,7 +313,7 @@ exports.postDetail = [
             ],
             as: "address",
           },
-        },
+        },*/
         /*
         { "$lookup": {
           "from": "comments",
@@ -702,8 +378,8 @@ exports.postDetail = [
             createdAt: 1,
             updatedAt: 1,
             comments: 1,
-            //"comments.post": 0,
-
+            // "comments.post": 0,
+            //user: 1,
             "user.username": 1,
             "user._id": 1,
           },
@@ -716,9 +392,59 @@ exports.postDetail = [
           console.log(typeof post);
           console.log(post[0]);
 
+          var post_users = {};
+          var IdOfTheownerofThePost = post[0].user;
+          post_users[IdOfTheownerofThePost] = {
+            userid: IdOfTheownerofThePost,
+            username: null,
+          };
+          post[0].comments.map(function (task, index, array) {
+            // return task.user;
+            var userid = task.user;
+            var username = task.username;
+            //console.log("task_name: ", userid);
+            //console.log("task_name: ", username);
+            post_users[userid] = { userid: userid, username: username };
+          });
+
+          for (var k in post_users) {
+            post_users[k]["useridMOD"] = "UID"+utility.randomNumber(4);
+            post_users[k]["usernameMOD"] = generateRandomUsername();
+          }
+
+          console.log("post_users: ", post_users);
+
+          post[0].comments.map(function (task, index, array) {
+            // return task.user;
+            var userid = task.user;
+            post[0].comments[index]["user"] = "621fc2975908110016fd6a06"
+            post[0].comments[index]["user"] = post_users[userid]["useridMOD"]
+            post[0].comments[index]["username"] =  post_users[userid]["usernameMOD"]
+          });
+
+
+          //console.log("post[0].comments: ", post[0].comments);
+
+
+
+		  //post[0].user = post_users[IdOfTheownerofThePost]["useridMOD"]
+		  //post[0].username = post_users[IdOfTheownerofThePost]["usernameMOD"]
+
+		  post[0].user[0]._id = post_users[IdOfTheownerofThePost]["useridMOD"]
+		  post[0].user[0].username = post_users[IdOfTheownerofThePost]["usernameMOD"]
+
+
+
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            post[0]
+          );
+
           /*
-          COMENTS
+          COMENTS with updated usetnames
           */
+          /*
           Comment.aggregate([
             {
               $match: { post: mongoose.Types.ObjectId(req.params.id) },
@@ -751,12 +477,28 @@ exports.postDetail = [
             console.log("comentarios");
             console.log(comentarios);
             post[0].comentarios = comentarios;
+
+
+			var task_names = post[0].comentarios.map(function (task, index, array) {
+				// return task.user;
+				console.log("task_name: ",task.user[0]._id)
+				console.log("task_name: ",task.user[0].username)
+			  });
+			
+			
+			
+
+
+
             return apiResponse.successResponseWithData(
               res,
               "Operation success",
               post[0]
             );
           });
+
+
+		  */
         } else {
           console.log("🎅❌❌❌❌❌ no post");
           return apiResponse.ErrorResponse(res, "the id is wrong");
@@ -969,145 +711,3 @@ exports.me = function (req, res) {
   }
   return res.send(500);
 };
-/**
- * Book update.
- *
- * @param {string}      title
- * @param {string}      description
- * @param {string}      isbn
- *
- * @returns {Object}
- */
-exports.bookUpdate = [
-  auth,
-  body("title", "Title must not be empty.").isLength({ min: 1 }).trim(),
-  body("description", "Description must not be empty.")
-    .isLength({ min: 1 })
-    .trim(),
-  body("isbn", "ISBN must not be empty")
-    .isLength({ min: 1 })
-    .trim()
-    .custom((value, { req }) => {
-      return Book.findOne({
-        isbn: value,
-        user: req.user._id,
-        _id: { $ne: req.params.id },
-      }).then((book) => {
-        if (book) {
-          return Promise.reject("Book already exist with this ISBN no.");
-        }
-      });
-    }),
-  sanitizeBody("*").escape(),
-  (req, res) => {
-    try {
-      const errors = validationResult(req);
-      var book = new Book({
-        title: req.body.title,
-        description: req.body.description,
-        isbn: req.body.isbn,
-        _id: req.params.id,
-      });
-
-      if (!errors.isEmpty()) {
-        return apiResponse.validationErrorWithData(
-          res,
-          "Validation Error.",
-          errors.array()
-        );
-      } else {
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-          return apiResponse.validationErrorWithData(
-            res,
-            "Invalid Error.",
-            "Invalid ID"
-          );
-        } else {
-          Book.findById(req.params.id, function (err, foundBook) {
-            if (foundBook === null) {
-              return apiResponse.notFoundResponse(
-                res,
-                "Book not exists with this id"
-              );
-            } else {
-              //Check authorized user
-              if (foundBook.user.toString() !== req.user._id) {
-                return apiResponse.unauthorizedResponse(
-                  res,
-                  "You are not authorized to do this operation."
-                );
-              } else {
-                //update book.
-                Book.findByIdAndUpdate(req.params.id, book, {}, function (err) {
-                  if (err) {
-                    return apiResponse.ErrorResponse(res, err);
-                  } else {
-                    let bookData = new BookData(book);
-                    return apiResponse.successResponseWithData(
-                      res,
-                      "Book update Success.",
-                      bookData
-                    );
-                  }
-                });
-              }
-            }
-          });
-        }
-      }
-    } catch (err) {
-      //throw error in json response with status 500.
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
-];
-
-/**
- * Book Delete.
- *
- * @param {string}      id
- *
- * @returns {Object}
- */
-exports.bookDelete = [
-  auth,
-  function (req, res) {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return apiResponse.validationErrorWithData(
-        res,
-        "Invalid Error.",
-        "Invalid ID"
-      );
-    }
-    try {
-      Book.findById(req.params.id, function (err, foundBook) {
-        if (foundBook === null) {
-          return apiResponse.notFoundResponse(
-            res,
-            "Book not exists with this id"
-          );
-        } else {
-          //Check authorized user
-          if (foundBook.user.toString() !== req.user._id) {
-            return apiResponse.unauthorizedResponse(
-              res,
-              "You are not authorized to do this operation."
-            );
-          } else {
-            //delete book.
-            Book.findByIdAndRemove(req.params.id, function (err) {
-              if (err) {
-                return apiResponse.ErrorResponse(res, err);
-              } else {
-                return apiResponse.successResponse(res, "Book delete Success.");
-              }
-            });
-          }
-        }
-      });
-    } catch (err) {
-      //throw error in json response with status 500.
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
-];

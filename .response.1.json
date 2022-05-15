@@ -1,0 +1,64 @@
+{
+  "status": 1,
+  "message": "Operation success",
+  "data": {
+    "_id": "6271ec9b5dd8ae0016cf7ce2",
+    "title": "Sv de Discord uwu",
+    "description": "<p>Entren al yuragi uwu están todos los anons invitados</p><p><br></p><p><a href=\"https://discord.gg/eH9eqxER\" rel=\"noopener noreferrer\" target=\"_blank\">https://discord.gg/eH9eqxER</a></p>",
+    "photo": {
+      "value": "photo",
+      "content": "https://ik.imagekit.io/ym5grvwvw2m/d869fe67-b120-479f-bdf2-06511621944e_ByQGgvwuG",
+      "source": "upload"
+    },
+    "music": "false",
+    "user": [{ "_id": "6271ec6c5dd8ae0016cf7cdc", "username": "raul1905" }],
+    "createdAt": "2022-05-04T03:01:47.386Z",
+    "updatedAt": "2022-05-04T03:01:47.386Z",
+    "comments": [
+      {
+        "_id": "627304e7a82d8d001676fb18",
+        "inResponseTo": [],
+        "user": "6194256266dfa30016df0c67",
+        "username": "Omega Actimel",
+        "post": "6271ec9b5dd8ae0016cf7ce2",
+        "text": "<p>Muchas gracias por la invitacion op pero podria darnos una introduccion a lo que nos vamos a encontrar adentro de ese grupo?</p>",
+        "createdAt": "2022-05-04T22:57:43.728Z",
+        "updatedAt": "2022-05-04T22:57:43.728Z",
+        "__v": 0
+      },
+      {
+        "_id": "62731a10a82d8d001676fb6e",
+        "inResponseTo": [],
+        "user": "6273190ba82d8d001676fb5a",
+        "username": "raul1068",
+        "post": "6271ec9b5dd8ae0016cf7ce2",
+        "text": "<p>ahí entro aver que onda </p>",
+        "createdAt": "2022-05-05T00:28:00.890Z",
+        "updatedAt": "2022-05-05T00:28:00.890Z",
+        "__v": 0
+      }
+    ],
+    "comentarios": [
+      {
+        "_id": "627304e7a82d8d001676fb18",
+        "inResponseTo": [],
+        "user": [
+          { "_id": "6194256266dfa30016df0c67", "username": "Omega Actimel" }
+        ],
+        "post": "6271ec9b5dd8ae0016cf7ce2",
+        "text": "<p>Muchas gracias por la invitacion op pero podria darnos una introduccion a lo que nos vamos a encontrar adentro de ese grupo?</p>",
+        "createdAt": "2022-05-04T22:57:43.728Z",
+        "updatedAt": "2022-05-04T22:57:43.728Z"
+      },
+      {
+        "_id": "62731a10a82d8d001676fb6e",
+        "inResponseTo": [],
+        "user": [{ "_id": "6273190ba82d8d001676fb5a", "username": "raul1068" }],
+        "post": "6271ec9b5dd8ae0016cf7ce2",
+        "text": "<p>ahí entro aver que onda </p>",
+        "createdAt": "2022-05-05T00:28:00.890Z",
+        "updatedAt": "2022-05-05T00:28:00.890Z"
+      }
+    ]
+  }
+}

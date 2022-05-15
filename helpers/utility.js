@@ -15,4 +15,8 @@ exports.stringIsNotNullOrEmpty = function (string) {
 	return !(typeof string === 'string' || string instanceof String)
 
 }
-
+exports.cleanHTMLTags = function (stringer) {
+	// https://stackoverflow.com/questions/5002111/how-to-strip-html-tags-from-string-in-javascript
+	var stringCleanedFromTags = stringer.replace(/<\/?[^>]+(>|$)/g, "");
+	return stringCleanedFromTags
+  }

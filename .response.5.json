@@ -1,0 +1,42 @@
+{
+  "status": 1,
+  "message": "Operation success",
+  "data": {
+    "_id": "6278660c11f3f50016d40900",
+    "title": "La inseguridad es una sensación?",
+    "description": "<p>Que paja que es la inseguridad,</p><p>Me sucedió la siguiente secuencia,</p><p>1.Quise salir a la calle y había un chabon</p><p>2.Este se empezó a acercar a la puerta</p><p>3.Me meto dentro de la casa y el chabon se va a la otra cuadra</p><p>4.Luego de un rato vuelvo a querer salir</p><p>5.El chabon se vuelve a acercar a la puerta</p><p>6.Me vuelvo a meter</p><p>7.Veo por el agujero del picaporte y el chabon se quedó esperando enfrente a que salga</p><p>8.No salí, fin</p><p><br></p><p>La verdad nosé que se puede hacer, es una paja que pase</p><p><br></p><p><img src=\"https://archivo.argentina.indymedia.org/uploads/2010/11/buenos_aires_nocturna_foto_satelital_thumb.jpg\"></p><h6><em>El Congo Urbano</em></h6><p><br></p><p>Posibles pasos a seguir</p><ul><li>No salir en las horas más peligrosas</li><li>Mudarse</li><li>Hacer el curso de tiró y llevar un 22</li><li>No poseer nada de valor</li><li>Llevar dos teléfonos para que uno sea el cebó</li><li>Ser chorro</li><li>Dado a qué si no llevas nada te pueden llegar a robar la ropa, Ir desnudo por la calle sería una posible solución</li><li>Comprar un chaleco de Kevlar</li><li>Vivir en un barrio privado</li><li>Ir al gym y ponerse fuerte</li></ul><p><br></p><p><strong>Conclusión: </strong>La verdad que es una paja pero bueno, por suerte no paso nada</p><p><br></p><p><strong>Para preguntarse:</strong></p><p>La inseguridad es una sensación? Era un chorro? La TV genera esa inseguridad o era posta? Era una víctima de esta sociedad o merece un tiró en la frente? Uno puede hacer algo para que mejore la situación?</p>",
+    "photo": {
+      "value": "photo",
+      "content": "https://ik.imagekit.io/ym5grvwvw2m/b8a91b7c-8b03-40e3-9994-7224fdcf913d_bOoKUE8dk",
+      "source": "upload"
+    },
+    "music": "JrIQNqRHLX8",
+    "user": [{ "_id": 4418, "username": "raul6476" }],
+    "createdAt": "2022-05-09T00:53:32.952Z",
+    "updatedAt": "2022-05-09T00:53:32.952Z",
+    "comments": [
+      {
+        "_id": "628046b3a64b3f2540440aea",
+        "inResponseTo": [],
+        "user": "61a2f710e144367b8014506f",
+        "username": "raul7846",
+        "post": "6278660c11f3f50016d40900",
+        "text": "<p>si</p>",
+        "createdAt": "2022-05-15T00:17:55.192Z",
+        "updatedAt": "2022-05-15T00:17:55.192Z",
+        "__v": 0
+      },
+      {
+        "_id": "628069133404230016bd826b",
+        "inResponseTo": ["628046b3a64b3f2540440aea"],
+        "user": "621fc2975908110016fd6a06",
+        "username": "raul6153",
+        "post": "6278660c11f3f50016d40900",
+        "text": "<p>Hay que matarlos a los chorros</p>",
+        "createdAt": "2022-05-15T02:44:35.025Z",
+        "updatedAt": "2022-05-15T02:44:35.025Z",
+        "__v": 0
+      }
+    ]
+  }
+}
