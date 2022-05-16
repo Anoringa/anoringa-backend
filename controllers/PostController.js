@@ -393,11 +393,17 @@ exports.postDetail = [
           console.log(post[0]);
 
           var post_users = {};
-          var IdOfTheownerofThePost = post[0].user;
+          var IdOfTheownerofThePost = post[0].user[0]._id;
+          var UsernameOfTheownerofThePost = post[0].user[0].username;
+
           post_users[IdOfTheownerofThePost] = {
             userid: IdOfTheownerofThePost,
-            username: null,
+            username: UsernameOfTheownerofThePost,
           };
+
+          //console.log("owner: ", post[0].user[0]);
+
+          //console.log("post_users owner: ", IdOfTheownerofThePost);
           post[0].comments.map(function (task, index, array) {
             // return task.user;
             var userid = task.user;
